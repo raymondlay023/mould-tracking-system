@@ -8,7 +8,8 @@ RUN apk add --no-cache \
     mysql-client \
     bash \
     git \
-    curl
+    curl \
+    unzip
 
 RUN docker-php-ext-install \
     pdo_mysql \
@@ -21,5 +22,7 @@ RUN docker-php-ext-install \
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/bin \
     --filename=composer
+
+# COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
