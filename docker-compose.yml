@@ -1,26 +1,22 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile
     container_name: mould_app
-    working_dir: /var/www/html
-    volumes:
-      - ./:/var/www/html
-    ports:
-      - "8000:8000"
     depends_on:
       - db
-    environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-    command: sh -c "php -S 0.0.0.0:8000 -t public"
+
+  nginx:
+    image: nginx:alpine
+    container_name: mould_nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
 
   db:
     image: mysql:8.0
     container_name: mould_db
-    ports:
-      - "3307:3306"
     environment:
       MYSQL_DATABASE: mould_tracking
       MYSQL_USER: mould_user
@@ -32,7 +28,6 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: mould_pma
     ports:
       - "8081:80"
     depends_on:

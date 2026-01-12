@@ -1,0 +1,25 @@
+FROM php:8.3-fpm-alpine
+
+# Base dependencies
+RUN apk add --no-cache \
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    mysql-client \
+    bash \
+    git \
+    curl
+
+RUN docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    intl \
+    zip \
+    pcntl
+
+# Composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/bin \
+    --filename=composer
+
+WORKDIR /var/www/html
