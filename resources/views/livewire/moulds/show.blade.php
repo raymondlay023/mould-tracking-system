@@ -16,10 +16,14 @@
         <div><b>Name:</b> {{ $mould->name }}</div>
         <div><b>Cavities:</b> {{ $mould->cavities }}</div>
         <div><b>Status:</b> {{ $mould->status }}</div>
+        <div class="pt-2 border-t text-sm">
+            <div><b>RMP Last:</b> {{ $mould->rmp_last_at ?? '-' }}</div>
+            <div><b>RMP By:</b> {{ $mould->rmp_approved_by ?? '-' }}</div>
+        </div>
     </div>
 
     {{-- ACTIVE RUN --}}
-    @if($activeRun)
+    @if ($activeRun)
         <div class="bg-yellow-50 border border-yellow-200 rounded p-4 mb-6">
             <div class="font-semibold mb-1">Run Active</div>
             <div class="text-sm">
@@ -41,25 +45,31 @@
                     <label class="text-sm">Machine *</label>
                     <select wire:model.defer="machine_id" class="mt-1 w-full rounded border-gray-300">
                         <option value="">-- pilih machine --</option>
-                        @foreach($machines as $mc)
+                        @foreach ($machines as $mc)
                             <option value="{{ $mc->id }}">
                                 {{ $mc->code }} ({{ $mc->plant?->name }} / {{ $mc->zone?->code }})
                             </option>
                         @endforeach
                     </select>
-                    @error('machine_id') <div class="text-red-600 text-xs mt-1">{{ $message }}</div> @enderror
+                    @error('machine_id')
+                        <div class="text-red-600 text-xs mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div>
                     <label class="text-sm">Operator (optional)</label>
                     <input type="text" wire:model.defer="operator_name" class="mt-1 w-full rounded border-gray-300">
-                    @error('operator_name') <div class="text-red-600 text-xs mt-1">{{ $message }}</div> @enderror
+                    @error('operator_name')
+                        <div class="text-red-600 text-xs mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="text-sm">Notes (optional)</label>
                     <textarea wire:model.defer="notes" class="mt-1 w-full rounded border-gray-300" rows="2"></textarea>
-                    @error('notes') <div class="text-red-600 text-xs mt-1">{{ $message }}</div> @enderror
+                    @error('notes')
+                        <div class="text-red-600 text-xs mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
             </div>
 

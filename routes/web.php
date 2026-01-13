@@ -8,10 +8,12 @@ use App\Livewire\Moulds\Index as MouldIndex;
 use App\Livewire\Moulds\Show as MouldShow;
 use App\Livewire\Plants\Index as PlantIndex;
 use App\Livewire\Qr\MouldQrBatch;
-use App\Livewire\Zones\Index as ZoneIndex;
-use Illuminate\Support\Facades\Route;
 use App\Livewire\Runs\Active as ActiveRuns;
 use App\Livewire\Runs\Close as CloseRun;
+use App\Livewire\Setups\Index as SetupIndex;
+use App\Livewire\Trials\Index as TrialIndex;
+use App\Livewire\Zones\Index as ZoneIndex;
+use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
 
@@ -37,6 +39,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
         Route::get('/moulds', MouldIndex::class)->name('moulds.index');
         Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
+        Route::get('/setups', SetupIndex::class)->name('setups.index');
+        Route::get('/trials', TrialIndex::class)->name('trials.index');
     });
 
     Route::middleware(['role:Admin'])->group(function () {
