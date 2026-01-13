@@ -10,6 +10,8 @@ use App\Livewire\Plants\Index as PlantIndex;
 use App\Livewire\Qr\MouldQrBatch;
 use App\Livewire\Zones\Index as ZoneIndex;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Runs\Active as ActiveRuns;
+use App\Livewire\Runs\Close as CloseRun;
 
 Route::view('/', 'welcome');
 
@@ -34,22 +36,24 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
         Route::get('/moulds', MouldIndex::class)->name('moulds.index');
+        Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
     });
 
     Route::middleware(['role:Admin'])->group(function () {
         Route::get('/import/moulds', MouldImport::class)->name('import.moulds');
     });
 
-    Route::middleware(['role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
-        Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
-    });
-        
     Route::middleware(['role:Admin'])->group(function () {
         Route::get('/qr/moulds', MouldQrBatch::class)->name('qr.moulds');
         Route::get('/audit', AuditIndex::class)->name('audit.index');
         Route::get('/plants', PlantIndex::class)->name('plants.index');
         Route::get('/zones', ZoneIndex::class)->name('zones.index');
         Route::get('/machines', MachineIndex::class)->name('machines.index');
+    });
+
+    Route::middleware(['auth', 'role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
+        Route::get('/runs/active', ActiveRuns::class)->name('runs.active');
+        Route::get('/runs/{run}/close', CloseRun::class)->name('runs.close');
     });
 
 });

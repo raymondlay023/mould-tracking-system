@@ -45,7 +45,7 @@
                             {{ __('Moulds') }}
                         </x-nav-link>
                     @endrole
-                    
+
                     @role('Admin')
                         <x-nav-link :href="route('import.moulds')" :active="request()->routeIs('import.moulds')">
                             {{ __('Import Mould') }}
@@ -78,6 +78,12 @@
                             {{ __('Machines') }}
                         </x-nav-link>
                     @endrole
+                    @role('Admin')
+                        <x-nav-link :href="route('runs.active')" :active="request()->routeIs('runs.active')">
+                            {{ __('Active Runs') }}
+                        </x-nav-link>
+                    @endrole
+
                 </div>
             </div>
 
