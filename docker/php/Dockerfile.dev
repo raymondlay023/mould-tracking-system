@@ -26,3 +26,5 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 # COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
+
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
