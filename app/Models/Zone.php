@@ -3,16 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 class Zone extends Model
 {
-    public function plant()
-    {
-        return $this->belongsTo(Plant::class);
-    }
+    use HasUuids;
 
-    public function machines()
-    {
-        return $this->hasMany(Machine::class);
-    }
+    protected $fillable = ['plant_id','code','name'];
+
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    public function plant() { return $this->belongsTo(Plant::class); }
+    public function machines() { return $this->hasMany(Machine::class); }
 }

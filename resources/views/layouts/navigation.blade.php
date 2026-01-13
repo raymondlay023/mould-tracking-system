@@ -63,7 +63,21 @@
                             {{ __('Audit Log') }}
                         </x-nav-link>
                     @endrole
-
+                    @role('Admin')
+                        <x-nav-link :href="route('plants.index')" :active="request()->routeIs('plants.index')">
+                            {{ __('Plants') }}
+                        </x-nav-link>
+                    @endrole
+                    @role('Admin')
+                        <x-nav-link :href="route('zones.index')" :active="request()->routeIs('zones.index')">
+                            {{ __('Zones') }}
+                        </x-nav-link>
+                    @endrole
+                    @role('Admin')
+                        <x-nav-link :href="route('machines.index')" :active="request()->routeIs('machines.index')">
+                            {{ __('Machines') }}
+                        </x-nav-link>
+                    @endrole
                 </div>
             </div>
 

@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Livewire\Audit\Index as AuditIndex;
 use App\Livewire\Imports\MouldImport;
+use App\Livewire\Machines\Index as MachineIndex;
 use App\Livewire\Moulds\Index as MouldIndex;
 use App\Livewire\Moulds\Show as MouldShow;
-use App\Livewire\Audit\Index as AuditIndex;
+use App\Livewire\Plants\Index as PlantIndex;
 use App\Livewire\Qr\MouldQrBatch;
+use App\Livewire\Zones\Index as ZoneIndex;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -40,13 +43,13 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
         Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
     });
-
+        
     Route::middleware(['role:Admin'])->group(function () {
         Route::get('/qr/moulds', MouldQrBatch::class)->name('qr.moulds');
-    });
-
-    Route::middleware(['role:Admin'])->group(function () {
         Route::get('/audit', AuditIndex::class)->name('audit.index');
+        Route::get('/plants', PlantIndex::class)->name('plants.index');
+        Route::get('/zones', ZoneIndex::class)->name('zones.index');
+        Route::get('/machines', MachineIndex::class)->name('machines.index');
     });
 
 });
