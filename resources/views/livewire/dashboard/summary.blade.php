@@ -1,4 +1,23 @@
-<div class="max-w-7xl mx-auto px-4 py-6">
+<div class="max-w-7xl mx-auto px-4 py-6" x-data="{
+    prevIds: [],
+    toasts: [],
+    init() { this.prevIds = @js($activeRunIds); },
+    sync(ids) {
+        const newOnes = ids.filter(x => !this.prevIds.includes(x));
+        const gone = this.prevIds.filter(x => !ids.includes(x));
+
+        newOnes.forEach(() => this.toast('✅ Active run baru muncul'));
+        gone.forEach(() => this.toast('ℹ️ Run selesai / hilang dari active'));
+
+        this.prevIds = ids;
+    },
+    toast(msg) {
+        const id = Date.now() + Math.random();
+        this.toasts.push({ id, msg });
+        setTimeout(() => this.toasts = this.toasts.filter(t => t.id !== id), 3000);
+    }
+}" x-init="init()">
+
     <div class="flex items-center justify-between mb-4">
         <h1 class="text-xl font-semibold">Dashboard Summary</h1>
         <div class="text-xs text-gray-500">Updated: {{ now() }}</div>
@@ -6,7 +25,7 @@
 
     {{-- KPI cards --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-        <div class="bg-white rounded shadow-sm p-4">
+        <div class="bg-white rounded shadow-sm p-4" wire:poll.5s x-effect="sync(@js($activeRunIds))">
             <div class="text-xs text-gray-500">Active Runs</div>
             <div class="text-2xl font-semibold">{{ $activeCount }}</div>
         </div>
@@ -184,5 +203,10 @@
             </table>
         </div>
 
+    </div>
+    <div class="fixed bottom-4 right-4 space-y-2 z-50">
+        <template x-for="t in toasts" :key="t.id">
+            <div class="bg-gray-900 text-white text-sm px-4 py-2 rounded shadow" x-text="t.msg"></div>
+        </template>
     </div>
 </div>

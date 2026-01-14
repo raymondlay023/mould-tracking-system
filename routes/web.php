@@ -26,66 +26,90 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome');
 
 Route::middleware(['auth'])->group(function () {
-    // Route::view('/dashboard', 'dashboard')->name('dashboard');
 
-    Route::middleware(['role:Admin'])->group(function () {
-        Route::view('/admin', 'admin.index')->name('admin.index');
-    });
+    /**
+     * Dashboard (batasi sesuai role yang kamu mau)
+     * Kalau sudah pakai Gate: ganti middleware ini jadi ->middleware(['can:view-dashboard'])
+     */
+    Route::get('/dashboard', Summary::class)
+        ->middleware(['role:Admin|Production|Maintenance|QA|Viewer'])
+        ->name('dashboard');
 
-    Route::middleware(['role:Production|Admin'])->group(function () {
-        Route::view('/production', 'production.index')->name('production.index');
-    });
+    /**
+     * Area landing per role
+     */
+    Route::view('/admin', 'admin.index')
+        ->middleware(['role:Admin'])
+        ->name('admin.index');
 
-    Route::middleware(['role:Maintenance|Admin'])->group(function () {
-        Route::view('/maintenance', 'maintenance.index')->name('maintenance.index');
-    });
+    Route::view('/production', 'production.index')
+        ->middleware(['role:Production|Admin'])
+        ->name('production.index');
 
-    Route::middleware(['role:QA|Admin'])->group(function () {
-        Route::view('/qa', 'qa.index')->name('qa.index');
-    });
+    Route::view('/maintenance', 'maintenance.index')
+        ->middleware(['role:Maintenance|Admin'])
+        ->name('maintenance.home'); // rename biar ga tabrakan dengan maintenance.index Livewire
 
+    Route::view('/qa', 'qa.index')
+        ->middleware(['role:QA|Admin'])
+        ->name('qa.index');
+
+    /**
+     * Operasional umum (semua role yang boleh operasional)
+     */
     Route::middleware(['role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
+        // Mould
         Route::get('/moulds', MouldIndex::class)->name('moulds.index');
         Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
+
+        // Setup & Trial
         Route::get('/setups', SetupIndex::class)->name('setups.index');
         Route::get('/trials', TrialIndex::class)->name('trials.index');
+
+        // Runs
+        Route::get('/runs/active', ActiveRuns::class)->name('runs.active');
+        Route::get('/runs/{run}/close', CloseRun::class)->name('runs.close');
+
+        // Maintenance feature (CRUD event)
+        Route::get('/maintenance/events', MaintenanceIndex::class)->name('maintenance.index');
+
+        // Location move
+        Route::get('/locations/move', Move::class)->name('locations.move');
+
+        // Alerts
+        Route::get('/alerts/pm-due', PmDue::class)->name('alerts.pm_due');
+
+        // Reports
+        Route::get('/reports/production', ProductionReport::class)->name('reports.production');
+        Route::get('/reports/production/{group}/{id}', ProductionDrilldown::class)->name('reports.production.drilldown');
+
+        Route::get('/reports/maintenance', MaintenanceReport::class)->name('reports.maintenance');
+        Route::get('/reports/maintenance/{group}/{id}', MaintenanceDrilldown::class)->name('reports.maintenance.drilldown');
     });
 
+    /**
+     * Admin only (master data + tools)
+     */
     Route::middleware(['role:Admin'])->group(function () {
+        // Import & QR
         Route::get('/import/moulds', MouldImport::class)->name('import.moulds');
-    });
-
-    Route::middleware(['role:Admin'])->group(function () {
         Route::get('/qr/moulds', MouldQrBatch::class)->name('qr.moulds');
+
+        // Audit
         Route::get('/audit', AuditIndex::class)->name('audit.index');
+
+        // Master Data
         Route::get('/plants', PlantIndex::class)->name('plants.index');
         Route::get('/zones', ZoneIndex::class)->name('zones.index');
         Route::get('/machines', MachineIndex::class)->name('machines.index');
     });
 
-    Route::middleware(['auth', 'role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
-        Route::get('/runs/active', ActiveRuns::class)->name('runs.active');
-        Route::get('/runs/{run}/close', CloseRun::class)->name('runs.close');
-    });
-
-    Route::get('/maintenance', MaintenanceIndex::class)->name('maintenance.index');
-    Route::get('/locations/move', Move::class)->name('locations.move');
-
-    Route::get('/alerts/pm-due', PmDue::class)->name('alerts.pm_due');
-
-    Route::get('/reports/production', ProductionReport::class)->name('reports.production');
-    Route::get('/reports/production/{group}/{id}', ProductionDrilldown::class)->name('reports.production.drilldown');
-
-    Route::get('/reports/maintenance', MaintenanceReport::class)->name('reports.maintenance');
-    Route::get('/reports/maintenance/{group}/{id}', MaintenanceDrilldown::class)->name('reports.maintenance.drilldown');
-
-    Route::get('/dashboard', Summary::class)->name('dashboard');
-});
-
-Route::middleware('auth')->group(function () {
+    /**
+     * Profile
+     */
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

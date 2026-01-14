@@ -2,14 +2,62 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Exports\TopCmExport;
+use App\Exports\TopNgExport;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Summary extends Component
 {
     public int $days_ng = 7;   // top NG last N days
 
     public int $days_cm = 30;  // top CM last N days
+
+    public function exportTopNg()
+    {
+        $ngFrom = now()->subDays($this->days_ng)->toDateString();
+
+        $topNg = DB::table('production_runs as pr')
+            ->join('moulds as mo', 'pr.mould_id', '=', 'mo.id')
+            ->whereNotNull('pr.end_ts')
+            ->whereDate('pr.end_ts', '>=', $ngFrom)
+            ->selectRaw('
+            mo.code as mould_code,
+            mo.name as mould_name,
+            SUM(pr.ok_part) as ok_sum,
+            SUM(pr.ng_part) as ng_sum,
+            SUM(pr.shot_total) as shot_sum
+        ')
+            ->groupBy('mo.code', 'mo.name')
+            ->orderByRaw('(CASE WHEN (SUM(pr.ok_part)+SUM(pr.ng_part))=0 THEN 0 ELSE (SUM(pr.ng_part)/(SUM(pr.ok_part)+SUM(pr.ng_part))) END) DESC')
+            ->limit(100)
+            ->get();
+
+        return Excel::download(new TopNgExport($topNg, $ngFrom), "top_ng_since_{$ngFrom}.xlsx");
+    }
+
+    public function exportTopCm()
+    {
+        $cmFrom = now()->subDays($this->days_cm)->toDateString();
+
+        $topCm = DB::table('maintenance_events as me')
+            ->join('moulds as mo', 'me.mould_id', '=', 'mo.id')
+            ->where('me.type', 'CM')
+            ->whereDate('me.end_ts', '>=', $cmFrom)
+            ->selectRaw('
+            mo.code as mould_code,
+            mo.name as mould_name,
+            COUNT(*) as cm_count,
+            COALESCE(SUM(me.downtime_min),0) as downtime_sum
+        ')
+            ->groupBy('mo.code', 'mo.name')
+            ->orderByDesc('cm_count')
+            ->limit(100)
+            ->get();
+
+        return Excel::download(new TopCmExport($topCm, $cmFrom), "top_cm_since_{$cmFrom}.xlsx");
+    }
 
     public function render()
     {
@@ -34,6 +82,8 @@ class Summary extends Component
             ]);
 
         $activeCount = (int) DB::table('production_runs')->whereNull('end_ts')->count();
+
+        $activeRunIds = $activeRuns->pluck('id')->values();
 
         // 2) PM Due & Overdue
         $today = now()->toDateString();
@@ -114,7 +164,7 @@ class Summary extends Component
             ->get();
 
         return view('livewire.dashboard.summary', compact(
-            'activeRuns', 'activeCount',
+            'activeRuns', 'activeCount','activeRunIds',
             'pmDue', 'pmOverdueCount', 'pmDueCount',
             'topNg', 'topCm', 'ngFrom', 'cmFrom'
         ));

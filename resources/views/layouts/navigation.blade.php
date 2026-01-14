@@ -12,10 +12,12 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    {{-- Dashboard --}}
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
+                    {{-- Role landing --}}
                     @role('Admin')
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
                             {{ __('Admin') }}
@@ -29,7 +31,7 @@
                     @endrole
 
                     @role('Maintenance|Admin')
-                        <x-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
+                        <x-nav-link :href="route('maintenance.home')" :active="request()->routeIs('maintenance.home')">
                             {{ __('Maintenance') }}
                         </x-nav-link>
                     @endrole
@@ -40,71 +42,65 @@
                         </x-nav-link>
                     @endrole
 
-                    @role('Admin')
-                        <x-nav-link :href="route('moulds.index')" :active="request()->routeIs('moulds.index')">
+                    {{-- Operasional --}}
+                    @role('Admin|Production|Maintenance|QA|Viewer')
+                        <x-nav-link :href="route('moulds.index')" :active="request()->routeIs('moulds.*')">
                             {{ __('Moulds') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('runs.active')" :active="request()->routeIs('runs.*')">
+                            {{ __('Runs') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
+                            {{ __('Maintenance Events') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('locations.move')" :active="request()->routeIs('locations.move')">
+                            {{ __('Move Location') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('alerts.pm_due')" :active="request()->routeIs('alerts.pm_due')">
+                            {{ __('PM Due') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('reports.production')" :active="request()->routeIs('reports.production*')">
+                            {{ __('Production Report') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('reports.maintenance')" :active="request()->routeIs('reports.maintenance*')">
+                            {{ __('Maintenance Report') }}
                         </x-nav-link>
                     @endrole
 
+                    {{-- Admin tools --}}
                     @role('Admin')
                         <x-nav-link :href="route('import.moulds')" :active="request()->routeIs('import.moulds')">
                             {{ __('Import Mould') }}
                         </x-nav-link>
-                    @endrole
 
-                    @role('Admin')
                         <x-nav-link :href="route('qr.moulds')" :active="request()->routeIs('qr.moulds')">
                             {{ __('QR Mould') }}
                         </x-nav-link>
-                    @endrole
 
-                    @role('Admin')
                         <x-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.index')">
                             {{ __('Audit Log') }}
                         </x-nav-link>
-                    @endrole
-                    @role('Admin')
+
                         <x-nav-link :href="route('plants.index')" :active="request()->routeIs('plants.index')">
                             {{ __('Plants') }}
                         </x-nav-link>
-                    @endrole
-                    @role('Admin')
+
                         <x-nav-link :href="route('zones.index')" :active="request()->routeIs('zones.index')">
                             {{ __('Zones') }}
                         </x-nav-link>
-                    @endrole
-                    @role('Admin')
+
                         <x-nav-link :href="route('machines.index')" :active="request()->routeIs('machines.index')">
                             {{ __('Machines') }}
                         </x-nav-link>
                     @endrole
-                    @role('Admin')
-                        <x-nav-link :href="route('runs.active')" :active="request()->routeIs('runs.active')">
-                            {{ __('Active Runs') }}
-                        </x-nav-link>
-                    @endrole
-
-                    <x-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
-                        {{ __('Maintenance') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('locations.move')" :active="request()->routeIs('locations.move')">
-                        {{ __('Move Location') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('alerts.pm_due')" :active="request()->routeIs('alerts.pm_due')">
-                        {{ __('PM Due') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('reports.production')" :active="request()->routeIs('reports.production')">
-                        {{ __('Production Report') }}
-                    </x-nav-link>
-                    
-                    <x-nav-link :href="route('reports.maintenance')" :active="request()->routeIs('reports.maintenance')">
-                        {{ __('Maintenance Report') }}
-                    </x-nav-link>
-
                 </div>
+
             </div>
 
             <!-- Settings Dropdown -->
