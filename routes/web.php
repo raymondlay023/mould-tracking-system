@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Livewire\Alerts\PmDue;
 use App\Livewire\Audit\Index as AuditIndex;
 use App\Livewire\Imports\MouldImport;
+use App\Livewire\Locations\Move;
 use App\Livewire\Machines\Index as MachineIndex;
+use App\Livewire\Maintenance\Index as MaintenanceIndex;
 use App\Livewire\Moulds\Index as MouldIndex;
 use App\Livewire\Moulds\Show as MouldShow;
 use App\Livewire\Plants\Index as PlantIndex;
@@ -60,6 +63,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/runs/{run}/close', CloseRun::class)->name('runs.close');
     });
 
+    Route::get('/maintenance', MaintenanceIndex::class)->name('maintenance.index');
+    Route::get('/locations/move', Move::class)->name('locations.move');
+
+    Route::get('/alerts/pm-due', PmDue::class)->name('alerts.pm_due');
 });
 
 Route::middleware('auth')->group(function () {

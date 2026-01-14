@@ -84,6 +84,18 @@
                         </x-nav-link>
                     @endrole
 
+                    <x-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
+                        {{ __('Maintenance') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('locations.move')" :active="request()->routeIs('locations.move')">
+                        {{ __('Move Location') }}
+                    </x-nav-link>
+
+                    <x-nav-link :href="route('alerts.pm_due')" :active="request()->routeIs('alerts.pm_due')">
+                        {{ __('PM Due') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 

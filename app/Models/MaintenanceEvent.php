@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class MaintenanceEvent extends Model
+{
+    use HasUuids;
+
+    protected $table = 'maintenance_events';
+    protected $keyType = 'string';
+    public $incrementing = false;
+
+    protected $fillable = [
+        'mould_id','start_ts','end_ts','type',
+        'description','parts_used','downtime_min','cost',
+        'next_due_shot','next_due_date',
+        'performed_by','notes'
+    ];
+
+    protected $casts = [
+        'start_ts' => 'datetime',
+        'end_ts' => 'datetime',
+        'downtime_min' => 'integer',
+        'cost' => 'integer',
+        'next_due_shot' => 'integer',
+        'next_due_date' => 'date',
+    ];
+
+    public function mould() { return $this->belongsTo(Mould::class); }
+}
