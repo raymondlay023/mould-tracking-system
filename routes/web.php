@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HealthCheckController;
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Alerts\PmDue;
 use App\Livewire\Audit\Index as AuditIndex;
@@ -22,6 +23,9 @@ use App\Livewire\Setups\Index as SetupIndex;
 use App\Livewire\Trials\Index as TrialIndex;
 use App\Livewire\Zones\Index as ZoneIndex;
 use Illuminate\Support\Facades\Route;
+
+// Health check endpoint (no authentication required)
+Route::get('/health', HealthCheckController::class)->name('health');
 
 Route::view('/', 'welcome');
 
