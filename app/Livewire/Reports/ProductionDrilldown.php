@@ -2,36 +2,47 @@
 
 namespace App\Livewire\Reports;
 
-use App\Models\Mould;
 use App\Models\Machine;
+use App\Models\Mould;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class ProductionDrilldown extends Component
 {
     public string $group; // mould|machine
+
     public string $id;    // uuid
 
     public string $date_from;
+
     public string $date_to;
 
     public ?string $plant_id = null;
+
     public ?string $zone_id = null;
+
     public ?string $machine_id = null;
+
+    public ?string $openRunId = null;
 
     public function mount(string $group, string $id): void
     {
-        abort_unless(in_array($group, ['mould','machine']), 404);
+        abort_unless(in_array($group, ['mould', 'machine']), 404);
 
         $this->group = $group;
         $this->id = $id;
 
         $this->date_from = request('date_from', now()->startOfMonth()->toDateString());
-        $this->date_to   = request('date_to', now()->toDateString());
+        $this->date_to = request('date_to', now()->toDateString());
 
         $this->plant_id = request('plant_id');
         $this->zone_id = request('zone_id');
         $this->machine_id = request('machine_id');
+    }
+
+    public function toggleDefects(string $runId): void
+    {
+        $this->openRunId = $this->openRunId === $runId ? null : $runId;
     }
 
     private function baseRunsQuery()
@@ -45,9 +56,9 @@ class ProductionDrilldown extends Component
             ->whereNotNull('pr.end_ts')
             ->whereDate('pr.end_ts', '>=', $this->date_from)
             ->whereDate('pr.end_ts', '<=', $this->date_to)
-            ->when($this->plant_id, fn($qq) => $qq->where('mc.plant_id', $this->plant_id))
-            ->when($this->zone_id, fn($qq) => $qq->where('mc.zone_id', $this->zone_id))
-            ->when($this->machine_id, fn($qq) => $qq->where('mc.id', $this->machine_id));
+            ->when($this->plant_id, fn ($qq) => $qq->where('mc.plant_id', $this->plant_id))
+            ->when($this->zone_id, fn ($qq) => $qq->where('mc.zone_id', $this->zone_id))
+            ->when($this->machine_id, fn ($qq) => $qq->where('mc.id', $this->machine_id));
 
         if ($this->group === 'mould') {
             $q->where('pr.mould_id', $this->id);
@@ -61,8 +72,8 @@ class ProductionDrilldown extends Component
     public function render()
     {
         $title = $this->group === 'mould'
-            ? optional(Mould::find($this->id))->code . ' - ' . optional(Mould::find($this->id))->name
-            : optional(Machine::find($this->id))->code . ' - ' . optional(Machine::find($this->id))->name;
+            ? optional(Mould::find($this->id))->code.' - '.optional(Mould::find($this->id))->name
+            : optional(Machine::find($this->id))->code.' - '.optional(Machine::find($this->id))->name;
 
         $runs = $this->baseRunsQuery()
             ->select([
@@ -82,6 +93,16 @@ class ProductionDrilldown extends Component
             ->limit(200)
             ->get();
 
+        $openDefects = collect();
+
+        if ($this->openRunId) {
+            $openDefects = DB::table('run_defects')
+                ->where('run_id', $this->openRunId)
+                ->select(['defect_code', 'qty'])
+                ->orderByDesc('qty')
+                ->get();
+        }
+
         // Top defects for this subset
         $topDefects = DB::table('run_defects as rd')
             ->join('production_runs as pr', 'rd.run_id', '=', 'pr.id') // ganti kalau tabel beda
@@ -89,11 +110,11 @@ class ProductionDrilldown extends Component
             ->whereNotNull('pr.end_ts')
             ->whereDate('pr.end_ts', '>=', $this->date_from)
             ->whereDate('pr.end_ts', '<=', $this->date_to)
-            ->when($this->plant_id, fn($qq) => $qq->where('mc.plant_id', $this->plant_id))
-            ->when($this->zone_id, fn($qq) => $qq->where('mc.zone_id', $this->zone_id))
-            ->when($this->machine_id, fn($qq) => $qq->where('mc.id', $this->machine_id))
-            ->when($this->group === 'mould', fn($qq) => $qq->where('pr.mould_id', $this->id))
-            ->when($this->group === 'machine', fn($qq) => $qq->where('pr.machine_id', $this->id))
+            ->when($this->plant_id, fn ($qq) => $qq->where('mc.plant_id', $this->plant_id))
+            ->when($this->zone_id, fn ($qq) => $qq->where('mc.zone_id', $this->zone_id))
+            ->when($this->machine_id, fn ($qq) => $qq->where('mc.id', $this->machine_id))
+            ->when($this->group === 'mould', fn ($qq) => $qq->where('pr.mould_id', $this->id))
+            ->when($this->group === 'machine', fn ($qq) => $qq->where('pr.machine_id', $this->id))
             ->selectRaw('rd.defect_code, SUM(rd.qty) as qty_sum')
             ->groupBy('rd.defect_code')
             ->orderByDesc('qty_sum')
@@ -108,7 +129,7 @@ class ProductionDrilldown extends Component
         $ngRate = $partTotal > 0 ? round(($kpiNg / $partTotal) * 100, 2) : 0;
 
         return view('livewire.reports.production-drilldown', compact(
-            'title','runs','topDefects','kpiShot','kpiOk','kpiNg','ngRate'
+            'title', 'runs', 'topDefects', 'kpiShot', 'kpiOk', 'kpiNg', 'ngRate', 'openDefects'
         ));
     }
 }

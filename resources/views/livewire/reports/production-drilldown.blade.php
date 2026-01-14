@@ -7,7 +7,7 @@
         </div>
 
         <a href="{{ route('reports.production') }}?date_from={{ request('date_from') }}&date_to={{ request('date_to') }}"
-           class="text-sm text-blue-600">← Back</a>
+            class="text-sm text-blue-600">← Back</a>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
@@ -47,7 +47,9 @@
                             <td class="text-right">{{ number_format($d->qty_sum) }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="2" class="py-6 text-center text-gray-500">No defects</td></tr>
+                        <tr>
+                            <td colspan="2" class="py-6 text-center text-gray-500">No defects</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -66,6 +68,7 @@
                         <th class="text-right">OK</th>
                         <th class="text-right">NG</th>
                         <th class="text-right">Cycle(s)</th>
+                        <th class="text-right">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,10 +83,52 @@
                             <td class="text-right">{{ number_format($r->shot_total) }}</td>
                             <td class="text-right">{{ number_format($r->ok_part) }}</td>
                             <td class="text-right">{{ number_format($r->ng_part) }}</td>
-                            <td class="text-right">{{ $r->cycle_time_avg_sec !== null ? number_format($r->cycle_time_avg_sec, 2) : '-' }}</td>
+                            <td class="text-right">
+                                {{ $r->cycle_time_avg_sec !== null ? number_format($r->cycle_time_avg_sec, 2) : '-' }}
+                            </td>
+                            <td class="text-right">
+                                <button type="button" wire:click="toggleDefects('{{ $r->id }}')"
+                                    class="text-blue-600 text-xs">
+                                    {{ $openRunId === $r->id ? 'Hide' : 'Defects' }}
+                                </button>
+                            </td>
                         </tr>
+                        @if ($openRunId === $r->id)
+                            <tr class="bg-gray-50">
+                                <td colspan="8" class="p-3">
+                                    <div class="text-xs font-semibold mb-2">Defect Breakdown</div>
+
+                                    @if ($openDefects->count() === 0)
+                                        <div class="text-xs text-gray-500">No defects for this run.</div>
+                                    @else
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-[320px] text-xs">
+                                                <thead>
+                                                    <tr class="text-left border-b">
+                                                        <th class="py-1">Defect Code</th>
+                                                        <th class="py-1 text-right">Qty</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($openDefects as $d)
+                                                        <tr class="border-b">
+                                                            <td class="py-1">{{ $d->defect_code }}</td>
+                                                            <td class="py-1 text-right">{{ number_format($d->qty) }}
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endif
+
                     @empty
-                        <tr><td colspan="7" class="py-6 text-center text-gray-500">No runs</td></tr>
+                        <tr>
+                            <td colspan="7" class="py-6 text-center text-gray-500">No runs</td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
