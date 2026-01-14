@@ -12,24 +12,39 @@ class Index extends Component
     use WithPagination;
 
     public string $search = '';
+
     public int $perPage = 10;
 
     public ?string $idEdit = null;
 
     public string $mould_id = '';
+
     public string $start_ts = '';
+
     public string $end_ts = '';
+
     public string $type = 'PM';
+
     public ?string $description = null;
+
     public ?string $parts_used = null;
+
     public int $downtime_min = 0;
+
     public ?int $cost = null;
+
     public ?int $next_due_shot = null;
+
     public ?string $next_due_date = null;
+
     public ?string $performed_by = null;
+
     public ?string $notes = null;
 
-    public function updatedSearch(): void { $this->resetPage(); }
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
 
     public function mount(): void
     {
@@ -56,18 +71,18 @@ class Index extends Component
     protected function rules(): array
     {
         return [
-            'mould_id' => ['required','exists:moulds,id'],
-            'start_ts' => ['required','date'],
-            'end_ts' => ['required','date','after:start_ts'],
-            'type' => ['required','in:PM,CM'],
-            'description' => ['nullable','string','max:255'],
-            'parts_used' => ['nullable','string','max:5000'],
-            'downtime_min' => ['required','integer','min:0'],
-            'cost' => ['nullable','integer','min:0'],
-            'next_due_shot' => ['nullable','integer','min:0'],
-            'next_due_date' => ['nullable','date'],
-            'performed_by' => ['nullable','string','max:100'],
-            'notes' => ['nullable','string','max:5000'],
+            'mould_id' => ['required', 'exists:moulds,id'],
+            'start_ts' => ['required', 'date'],
+            'end_ts' => ['required', 'date', 'after:start_ts'],
+            'type' => ['required', 'in:PM,CM'],
+            'description' => ['nullable', 'string', 'max:255'],
+            'parts_used' => ['nullable', 'string', 'max:5000'],
+            'downtime_min' => ['required', 'integer', 'min:0'],
+            'cost' => ['nullable', 'integer', 'min:0'],
+            'next_due_shot' => ['nullable', 'integer', 'min:0'],
+            'next_due_date' => ['nullable', 'date'],
+            'performed_by' => ['nullable', 'string', 'max:100'],
+            'notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 
@@ -100,12 +115,31 @@ class Index extends Component
     {
         $v = $this->validate();
 
+        $loc = \App\Models\LocationHistory::query()
+            ->where('mould_id', $v['mould_id'])
+            ->whereNull('end_ts')
+            ->first();
+
+        $autoMachineId = null;
+        $autoPlantId = null;
+
+        if ($loc) {
+            $autoPlantId = $loc->plant_id;
+
+            if ($loc->location === 'MACHINE') {
+                $autoMachineId = $loc->machine_id;
+            }
+        }
+
         MaintenanceEvent::updateOrCreate(
             ['id' => $this->idEdit],
             [
                 ...$v,
                 'next_due_date' => $v['next_due_date'] ?: null,
                 'performed_by' => $v['performed_by'] ?: (auth()->user()?->name),
+                'machine_id' => $autoMachineId,
+                'plant_id' => $autoPlantId,
+
             ]
         );
 
@@ -126,13 +160,13 @@ class Index extends Component
 
         $events = MaintenanceEvent::query()
             ->with('mould')
-            ->when($this->search !== '', function($q){
-                $q->whereHas('mould', fn($mq) => $mq->where('code','like',"%{$this->search}%")->orWhere('name','like',"%{$this->search}%"))
-                  ->orWhere('description','like',"%{$this->search}%");
+            ->when($this->search !== '', function ($q) {
+                $q->whereHas('mould', fn ($mq) => $mq->where('code', 'like', "%{$this->search}%")->orWhere('name', 'like', "%{$this->search}%"))
+                    ->orWhere('description', 'like', "%{$this->search}%");
             })
             ->orderByDesc('end_ts')
             ->paginate($this->perPage);
 
-        return view('livewire.maintenance.index', compact('events','moulds'));
+        return view('livewire.maintenance.index', compact('events', 'moulds'));
     }
 }

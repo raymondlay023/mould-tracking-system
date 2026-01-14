@@ -69,9 +69,13 @@
                         </td>
 
                         <td class="text-xs">
-                            <div>{{ $r->plant_name ?? '-' }} / {{ $r->zone_code ?? '-' }}</div>
-                            <div class="text-gray-500">{{ $r->machine_code ?? ($r->current_location ?? '-') }}</div>
-                            <div class="text-gray-400">Since: {{ $r->location_since ?? '-' }}</div>
+                            <div class="font-medium">Last Maint At</div>
+                            <div>{{ $r->last_maint_plant_name ?? '-' }} / {{ $r->last_maint_zone_code ?? '-' }}</div>
+                            <div class="text-gray-500">{{ $r->last_maint_machine_code ?? '-' }}</div>
+
+                            <div class="mt-2 font-medium">Current</div>
+                            <div class="text-gray-500">{{ $r->plant_name ?? '-' }} / {{ $r->zone_code ?? '-' }}</div>
+                            <div class="text-gray-400">{{ $r->machine_code ?? ($r->current_location ?? '-') }}</div>
                         </td>
 
                         <td class="text-xs">

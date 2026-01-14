@@ -99,6 +99,10 @@
                     <x-nav-link :href="route('reports.production')" :active="request()->routeIs('reports.production')">
                         {{ __('Production Report') }}
                     </x-nav-link>
+                    
+                    <x-nav-link :href="route('reports.maintenance')" :active="request()->routeIs('reports.maintenance')">
+                        {{ __('Maintenance Report') }}
+                    </x-nav-link>
 
                 </div>
             </div>

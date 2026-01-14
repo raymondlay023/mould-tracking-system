@@ -2,17 +2,19 @@
 
 namespace App\Livewire\Alerts;
 
+use App\Models\Machine;
 use App\Models\Mould;
 use App\Models\Plant;
 use App\Models\Zone;
-use App\Models\Machine;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class PmDue extends Component
 {
     public ?string $plant_id = null;
+
     public ?string $zone_id = null;
+
     public ?string $machine_id = null;
 
     public string $level = 'all'; // all|due|overdue
@@ -30,7 +32,7 @@ class PmDue extends Component
         $maint = DB::table('maintenance_events as me')
             ->joinSub($lastMaint, 'lm', function ($j) {
                 $j->on('me.mould_id', '=', 'lm.mould_id')
-                  ->on('me.end_ts', '=', 'lm.last_end_ts');
+                    ->on('me.end_ts', '=', 'lm.last_end_ts');
             })
             ->select([
                 'me.mould_id',
@@ -38,6 +40,8 @@ class PmDue extends Component
                 'me.type as last_maint_type',
                 'me.next_due_date',
                 'me.next_due_shot',
+                'me.machine_id as last_maint_machine_id',
+                'me.plant_id as last_maint_plant_id',
             ]);
 
         // subquery: total shot per mould (MVP)
@@ -57,12 +61,16 @@ class PmDue extends Component
             ]);
 
         $rows = DB::table('moulds as m')
-            ->leftJoinSub($maint, 'lastm', fn($j) => $j->on('m.id', '=', 'lastm.mould_id'))
-            ->leftJoinSub($shotAgg, 'shots', fn($j) => $j->on('m.id', '=', 'shots.mould_id'))
-            ->leftJoinSub($curLoc, 'loc', fn($j) => $j->on('m.id', '=', 'loc.mould_id'))
+            ->leftJoinSub($maint, 'lastm', fn ($j) => $j->on('m.id', '=', 'lastm.mould_id'))
+            ->leftJoinSub($shotAgg, 'shots', fn ($j) => $j->on('m.id', '=', 'shots.mould_id'))
+            ->leftJoinSub($curLoc, 'loc', fn ($j) => $j->on('m.id', '=', 'loc.mould_id'))
             ->leftJoin('machines as mc', 'loc.machine_id', '=', 'mc.id')
             ->leftJoin('zones as z', 'mc.zone_id', '=', 'z.id')
             ->leftJoin('plants as p', 'loc.plant_id', '=', 'p.id')
+            ->leftJoin('machines as mc_last', 'lastm.last_maint_machine_id', '=', 'mc_last.id')
+            ->leftJoin('zones as z_last', 'mc_last.zone_id', '=', 'z_last.id')
+            ->leftJoin('plants as p_last', 'lastm.last_maint_plant_id', '=', 'p_last.id')
+
             ->select([
                 'm.id',
                 'm.code',
@@ -81,18 +89,24 @@ class PmDue extends Component
                 'p.name as plant_name',
                 'z.code as zone_code',
                 'mc.code as machine_code',
+
+                'p_last.name as last_maint_plant_name',
+                'z_last.code as last_maint_zone_code',
+                'mc_last.code as last_maint_machine_code',
+
             ])
             ->whereNotNull('lastm.mould_id') // hanya yang pernah punya maintenance event
-            ->when($this->plant_id, fn($q) => $q->where('loc.plant_id', $this->plant_id))
-            ->when($this->zone_id, fn($q) => $q->where('mc.zone_id', $this->zone_id))
-            ->when($this->machine_id, fn($q) => $q->where('loc.machine_id', $this->machine_id))
+            ->when($this->plant_id, fn ($q) => $q->where('lastm.last_maint_plant_id', $this->plant_id))
+            ->when($this->zone_id, fn ($q) => $q->where('mc_last.zone_id', $this->zone_id))
+            ->when($this->machine_id, fn ($q) => $q->where('lastm.last_maint_machine_id', $this->machine_id))
+
             ->orderBy('m.code');
 
         // apply level filter
         $data = $rows->get()->map(function ($r) use ($today) {
             $dueByDate = $r->next_due_date && $r->next_due_date <= $today;
 
-            $dueByShot = $r->next_due_shot !== null && (int)$r->total_shot >= (int)$r->next_due_shot;
+            $dueByShot = $r->next_due_shot !== null && (int) $r->total_shot >= (int) $r->next_due_shot;
 
             $isDue = $dueByDate || $dueByShot;
 
@@ -100,10 +114,10 @@ class PmDue extends Component
             // - overdue date: next_due_date < today
             // - overdue shot: total_shot > next_due_shot
             $overByDate = $r->next_due_date && $r->next_due_date < $today;
-            $overByShot = $r->next_due_shot !== null && (int)$r->total_shot > (int)$r->next_due_shot;
+            $overByShot = $r->next_due_shot !== null && (int) $r->total_shot > (int) $r->next_due_shot;
             $isOverdue = $overByDate || $overByShot;
 
-            $r->due_by = trim(($dueByDate ? 'DATE ' : '') . ($dueByShot ? 'SHOT' : ''));
+            $r->due_by = trim(($dueByDate ? 'DATE ' : '').($dueByShot ? 'SHOT' : ''));
             $r->pm_status = $isOverdue ? 'OVERDUE' : ($isDue ? 'DUE' : 'OK');
 
             return $r;
@@ -117,12 +131,12 @@ class PmDue extends Component
 
         $plants = Plant::orderBy('name')->get();
         $zones = Zone::orderBy('code')->get();
-        $machines = Machine::with('plant','zone')->orderBy('code')->get();
+        $machines = Machine::with('plant', 'zone')->orderBy('code')->get();
 
         $counts = [
             'all' => $data->count(),
-            'due' => $data->where('pm_status','DUE')->count(),
-            'overdue' => $data->where('pm_status','OVERDUE')->count(),
+            'due' => $data->where('pm_status', 'DUE')->count(),
+            'overdue' => $data->where('pm_status', 'OVERDUE')->count(),
         ];
 
         return view('livewire.alerts.pm-due', [

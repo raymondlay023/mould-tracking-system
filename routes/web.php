@@ -11,6 +11,8 @@ use App\Livewire\Moulds\Index as MouldIndex;
 use App\Livewire\Moulds\Show as MouldShow;
 use App\Livewire\Plants\Index as PlantIndex;
 use App\Livewire\Qr\MouldQrBatch;
+use App\Livewire\Reports\MaintenanceDrilldown;
+use App\Livewire\Reports\MaintenanceReport;
 use App\Livewire\Reports\ProductionDrilldown;
 use App\Livewire\Reports\ProductionReport;
 use App\Livewire\Runs\Active as ActiveRuns;
@@ -72,6 +74,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reports/production', ProductionReport::class)->name('reports.production');
     Route::get('/reports/production/{group}/{id}', ProductionDrilldown::class)->name('reports.production.drilldown');
+    
+    Route::get('/reports/maintenance', MaintenanceReport::class)->name('reports.maintenance');
+    Route::get('/reports/maintenance/{group}/{id}', MaintenanceDrilldown::class)->name('reports.maintenance.drilldown');
 });
 
 Route::middleware('auth')->group(function () {

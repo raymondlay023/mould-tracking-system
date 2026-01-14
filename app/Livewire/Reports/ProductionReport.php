@@ -2,11 +2,13 @@
 
 namespace App\Livewire\Reports;
 
+use App\Exports\ProductionReportExport;
 use App\Models\Machine;
 use App\Models\Plant;
 use App\Models\Zone;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductionReport extends Component
 {
@@ -28,6 +30,15 @@ class ProductionReport extends Component
     {
         $this->date_from = now()->startOfMonth()->toDateString();
         $this->date_to = now()->toDateString();
+    }
+
+    public function exportExcel()
+    {
+        $rows = $this->buildQuery()->get();
+
+        $filename = 'production_report_'.$this->date_from.'_to_'.$this->date_to.'.xlsx';
+
+        return Excel::download(new ProductionReportExport($rows), $filename);
     }
 
     public function exportCsv(): \Symfony\Component\HttpFoundation\StreamedResponse
