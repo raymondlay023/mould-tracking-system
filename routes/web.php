@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Livewire\Alerts\PmDue;
 use App\Livewire\Audit\Index as AuditIndex;
+use App\Livewire\Dashboard\Summary;
 use App\Livewire\Imports\MouldImport;
 use App\Livewire\Locations\Move;
 use App\Livewire\Machines\Index as MachineIndex;
@@ -25,7 +26,7 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome');
 
 Route::middleware(['auth'])->group(function () {
-    Route::view('/dashboard', 'dashboard')->name('dashboard');
+    // Route::view('/dashboard', 'dashboard')->name('dashboard');
 
     Route::middleware(['role:Admin'])->group(function () {
         Route::view('/admin', 'admin.index')->name('admin.index');
@@ -74,9 +75,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/reports/production', ProductionReport::class)->name('reports.production');
     Route::get('/reports/production/{group}/{id}', ProductionDrilldown::class)->name('reports.production.drilldown');
-    
+
     Route::get('/reports/maintenance', MaintenanceReport::class)->name('reports.maintenance');
     Route::get('/reports/maintenance/{group}/{id}', MaintenanceDrilldown::class)->name('reports.maintenance.drilldown');
+
+    Route::get('/dashboard', Summary::class)->name('dashboard');
 });
 
 Route::middleware('auth')->group(function () {
