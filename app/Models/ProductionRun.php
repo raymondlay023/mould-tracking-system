@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -14,14 +14,15 @@ class ProductionRun extends Model
     protected $table = 'production_runs';
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     protected $fillable = [
-        'mould_id','machine_id',
-        'start_ts','end_ts',
+        'mould_id', 'machine_id',
+        'start_ts', 'end_ts',
         'cavities_snapshot',
-        'shot_total','part_total','ok_part','ng_part',
-        'cycle_time_avg_sec','operator_name','notes',
+        'shot_total', 'part_total', 'ok_part', 'ng_part',
+        'cycle_time_avg_sec', 'operator_name', 'notes',
     ];
 
     protected $casts = [
@@ -35,9 +36,20 @@ class ProductionRun extends Model
         'cycle_time_avg_sec' => 'integer',
     ];
 
-    public function mould() { return $this->belongsTo(Mould::class); }
-    public function machine() { return $this->belongsTo(Machine::class); }
-    public function defects() { return $this->hasMany(RunDefect::class, 'run_id'); }
+    public function mould()
+    {
+        return $this->belongsTo(Mould::class);
+    }
+
+    public function machine()
+    {
+        return $this->belongsTo(Machine::class);
+    }
+
+    public function defects()
+    {
+        return $this->hasMany(RunDefect::class, 'run_id');
+    }
 
     public function scopeActive($q)
     {
@@ -49,11 +61,21 @@ class ProductionRun extends Model
         return LogOptions::defaults()
             ->useLogName('run')
             ->logOnly([
-                'mould_id','machine_id','start_ts','end_ts',
-                'shot_total','part_total','ok_part','ng_part','cycle_time_avg_sec',
+                'mould_id', 'machine_id', 'start_ts', 'end_ts',
+                'shot_total', 'part_total', 'ok_part', 'ng_part', 'cycle_time_avg_sec',
                 'operator_name',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($run) {
+            if (empty($run->cavities_snapshot) && $run->mould_id) {
+                $cav = \App\Models\Mould::where('id', $run->mould_id)->value('cavities');
+                $run->cavities_snapshot = (int) ($cav ?? 1);
+            }
+        });
     }
 }
