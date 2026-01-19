@@ -69,6 +69,10 @@ class Index extends Component
 
     public function save(): void
     {
+        // Security: Block Viewer/QA from writing
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
+
         $validated = $this->validate();
 
         // extra rule: min <= max (kalau dua-duanya ada)
@@ -94,6 +98,9 @@ class Index extends Component
 
     public function edit(string $id): void
     {
+        // Security: Block Viewer/QA
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
         $mould = Mould::findOrFail($id);
 
         $this->mouldId = $mould->id;
@@ -114,13 +121,20 @@ class Index extends Component
 
     public function createNew(): void
     {
+        // Security: Block Viewer/QA
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
         $this->resetForm();
         $this->resetValidation();
     }
 
     public function delete(string $id): void
     {
-        Mould::where('id', $id)->delete();
+        // Security check for delete - maybe strict Admin?
+        // Let's stick to restricting Viewers/QA
+        abort_if(!auth()->user()->hasRole(['Admin']), 403, 'Unauthorized');
+
+        Mould::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Mould berhasil dihapus.');
         $this->resetForm();
     }

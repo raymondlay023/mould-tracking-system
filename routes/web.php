@@ -42,19 +42,19 @@ Route::middleware(['auth'])->group(function () {
     /**
      * Area landing per role
      */
-    Route::view('/admin', 'admin.index')
+    Route::get('/admin', \App\Livewire\Admin\Dashboard::class)
         ->middleware(['role:Admin'])
         ->name('admin.index');
 
-    Route::view('/production', 'production.index')
+    Route::get('/production', \App\Livewire\Production\Dashboard::class)
         ->middleware(['role:Production|Admin'])
         ->name('production.index');
 
-    Route::view('/maintenance', 'maintenance.index')
+    Route::get('/maintenance', \App\Livewire\Maintenance\Dashboard::class)
         ->middleware(['role:Maintenance|Admin'])
-        ->name('maintenance.home'); // rename biar ga tabrakan dengan maintenance.index Livewire
+        ->name('maintenance.home');
 
-    Route::view('/qa', 'qa.index')
+    Route::get('/qa', \App\Livewire\Qa\Dashboard::class)
         ->middleware(['role:QA|Admin'])
         ->name('qa.index');
 

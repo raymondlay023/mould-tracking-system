@@ -30,6 +30,9 @@ class Move extends Component
 
     public function move(): void
     {
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
         $v = $this->validate();
 
         if ($v['location'] === 'MACHINE' && empty($v['machine_id'])) {
@@ -42,7 +45,7 @@ class Move extends Component
         DB::transaction(function () use ($v, $movedBy) {
             // close current location
             LocationHistory::query()
-                ->where('mould_id', $v['mould_id'])
+                ->where('mould_id', '=', $v['mould_id'], 'and')
                 ->whereNull('end_ts')
                 ->update(['end_ts' => now()]);
 

@@ -113,10 +113,13 @@ class Index extends Component
 
     public function save(): void
     {
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
         $v = $this->validate();
 
         $loc = \App\Models\LocationHistory::query()
-            ->where('mould_id', $v['mould_id'])
+            ->where('mould_id', '=', $v['mould_id'])
             ->whereNull('end_ts')
             ->first();
 
@@ -149,7 +152,10 @@ class Index extends Component
 
     public function delete(string $id): void
     {
-        MaintenanceEvent::where('id', $id)->delete();
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Maintenance']), 403, 'Unauthorized');
+
+        MaintenanceEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Maintenance deleted.');
         $this->createNew();
     }

@@ -68,6 +68,10 @@ class Index extends Component
 
     public function save(): void
     {
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'QA']), 403, 'Unauthorized');
+
+
         $v = $this->validate();
 
         TrialEvent::updateOrCreate(
@@ -81,7 +85,10 @@ class Index extends Component
 
     public function delete(string $id): void
     {
-        TrialEvent::where('id', $id)->delete();
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'QA']), 403, 'Unauthorized');
+
+        TrialEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Trial deleted.');
         $this->createNew();
     }
@@ -98,6 +105,10 @@ class Index extends Component
 
     private function approve(string $id, bool $go): void
     {
+        // Security Check: Only QA/Admin can approve
+        abort_if(!auth()->user()->hasRole(['Admin', 'QA']), 403, 'Unauthorized');
+
+
         $userName = auth()->user()?->name ?? 'Unknown';
         $now = now();
 

@@ -68,6 +68,9 @@ class Index extends Component
 
     public function save(): void
     {
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
         $v = $this->validate();
 
         SetupEvent::updateOrCreate(
@@ -85,7 +88,10 @@ class Index extends Component
 
     public function delete(string $id): void
     {
-        SetupEvent::where('id', $id)->delete();
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
+        SetupEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Setup deleted.');
         $this->createNew();
     }

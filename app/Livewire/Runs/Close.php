@@ -79,6 +79,9 @@ class Close extends Component
             return;
         }
 
+        // Security Check
+        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+
         $v = $this->validate();
 
         $cav = (int) $this->run->cavities_snapshot;
@@ -120,7 +123,7 @@ class Close extends Component
             ]);
 
             // replace defect rows
-            RunDefect::where('run_id', $this->run->id)->delete();
+            RunDefect::where('run_id', '=', $this->run->id, 'and')->delete();
             foreach ($filtered as $d) {
                 RunDefect::create([
                     'run_id' => $this->run->id,
