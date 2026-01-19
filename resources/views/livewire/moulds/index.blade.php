@@ -101,7 +101,7 @@
                         <label class="text-sm">Status</label>
                         <select wire:model.defer="status" class="mt-1 w-full rounded border-gray-300">
                             @foreach($statusOptions as $opt)
-                                <option value="{{ $opt }}">{{ $opt }}</option>
+                                <option value="{{ $opt->value }}">{{ $opt->label() }}</option>
                             @endforeach
                         </select>
                         @error('status') <div class="text-red-600 text-xs mt-1">{{ $message }}</div> @enderror
@@ -156,7 +156,13 @@
                                     <td class="py-2 font-medium">{{ $m->code }}</td>
                                     <td>{{ $m->name }}</td>
                                     <td>{{ $m->cavities }}</td>
-                                    <td>{{ $m->status }}</td>
+                                    <td>
+                                        @if($m->status instanceof \App\Enums\MouldStatus)
+                                            {{ $m->status->label() }}
+                                        @else
+                                            {{ $m->status }}
+                                        @endif
+                                    </td>
                                     <td class="text-right py-2">
                                         <button wire:click="edit('{{ $m->id }}')" class="text-blue-600">Edit</button>
                                         <button

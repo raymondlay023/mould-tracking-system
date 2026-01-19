@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\MouldStatus;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -34,7 +35,7 @@ class MouldManagementTest extends TestCase
         $response = $this->get(route('moulds.index'));
 
         $response->assertOk();
-        $response->assertSeeLivewire('moulds.index');
+        $response->assertSeeLivewire(\App\Livewire\Moulds\Index::class);
     }
 
     /** @test */
@@ -50,7 +51,7 @@ class MouldManagementTest extends TestCase
             ->set('max_tonnage_t', 300)
             ->set('pm_interval_shot', 100000)
             ->set('pm_interval_days', 90)
-            ->set('status', 'AVAILABLE')
+            ->set('status', MouldStatus::AVAILABLE->value)
             ->call('save')
             ->assertHasNoErrors();
 
@@ -71,7 +72,7 @@ class MouldManagementTest extends TestCase
             ->set('code', 'MLD-DUP-001')
             ->set('name', 'Duplicate Mould')
             ->set('cavities', 2)
-            ->set('status', 'AVAILABLE')
+            ->set('status', MouldStatus::AVAILABLE->value)
             ->call('save')
             ->assertHasErrors('code');
     }
@@ -85,7 +86,7 @@ class MouldManagementTest extends TestCase
             ->set('cavities', 2)
             ->set('min_tonnage_t', 500)
             ->set('max_tonnage_t', 300) // Min > Max!
-            ->set('status', 'AVAILABLE')
+            ->set('status', MouldStatus::AVAILABLE->value)
             ->call('save')
             ->assertHasErrors('min_tonnage_t');
     }
@@ -145,7 +146,7 @@ class MouldManagementTest extends TestCase
             ->set('code', 'MLD-CAV-001')
             ->set('name', 'Cavity Test')
             ->set('cavities', 0) // Invalid
-            ->set('status', 'AVAILABLE')
+            ->set('status', MouldStatus::AVAILABLE->value)
             ->call('save')
             ->assertHasErrors('cavities');
     }

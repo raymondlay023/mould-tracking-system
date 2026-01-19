@@ -32,7 +32,7 @@ class MouldFactory extends Factory
             'commissioned_at' => fake()->dateTimeBetween('-5 years', '-1 month'),
             'rmp_last_at' => fake()->optional(0.3)->dateTimeBetween('-1 year', 'now'),
             'rmp_approved_by' => fake()->optional(0.3)->name(),
-            'status' => fake()->randomElement(['AVAILABLE', 'IN_SETUP', 'IN_RUN', 'IN_MAINTENANCE', 'IN_TRANSIT']),
+            'status' => fake()->randomElement(\App\Enums\MouldStatus::cases()),
         ];
     }
 
@@ -42,7 +42,7 @@ class MouldFactory extends Factory
     public function available(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'AVAILABLE',
+            'status' => \App\Enums\MouldStatus::AVAILABLE,
         ]);
     }
 
@@ -52,7 +52,7 @@ class MouldFactory extends Factory
     public function inRun(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'IN_RUN',
+            'status' => \App\Enums\MouldStatus::IN_RUN,
         ]);
     }
 
@@ -62,7 +62,7 @@ class MouldFactory extends Factory
     public function inMaintenance(): static
     {
         return $this->state(fn (array $attributes) => [
-            'status' => 'IN_MAINTENANCE',
+            'status' => \App\Enums\MouldStatus::IN_MAINTENANCE,
         ]);
     }
 }

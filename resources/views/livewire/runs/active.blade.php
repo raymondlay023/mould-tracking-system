@@ -151,6 +151,10 @@
                 @endforelse
             </tbody>
         </table>
+        
+        <div class="mt-4">
+            {{ $runs->links() }}
+        </div>
     </div>
 
 </div>

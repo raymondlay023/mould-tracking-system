@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -42,6 +44,7 @@ class Mould extends Model
         'max_tonnage_t' => 'integer',
         'pm_interval_shot' => 'integer',
         'pm_interval_days' => 'integer',
+        'status' => \App\Enums\MouldStatus::class,
     ];
 
     public function getActivitylogOptions(): LogOptions

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Runs;
 
 use App\Models\Machine;
@@ -7,9 +9,11 @@ use App\Models\Plant;
 use App\Models\ProductionRun;
 use App\Models\Zone;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class Active extends Component
 {
+    use WithPagination;
     public string $plant_id = '';
 
     public string $zone_id = '';
@@ -111,8 +115,7 @@ class Active extends Component
                     $mq->where('code', 'like', "%{$this->search}%")->orWhere('name', 'like', "%{$this->search}%");
                 });
             })
-            ->orderByDesc('start_ts')
-            ->get();
+            ->paginate(20);
 
         return view('livewire.runs.active', compact('runs', 'plants', 'zones', 'machines'));
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Livewire\Moulds;
 
 use App\Models\Mould;
@@ -28,13 +30,10 @@ class Index extends Component
     public ?string $commissioned_at = null; // YYYY-MM-DD
     public string $status = 'AVAILABLE';
 
-    public array $statusOptions = [
-        'AVAILABLE',
-        'IN_SETUP',
-        'IN_RUN',
-        'IN_MAINTENANCE',
-        'IN_TRANSIT',
-    ];
+    public function getStatusOptionsProperty() 
+    {
+        return \App\Enums\MouldStatus::cases();
+    }
 
     public function updatedSearch(): void
     {
@@ -64,7 +63,7 @@ class Index extends Component
 
             'commissioned_at' => ['nullable', 'date_format:Y-m-d'],
 
-            'status' => ['required', Rule::in($this->statusOptions)],
+            'status' => ['required', Rule::enum(\App\Enums\MouldStatus::class)],
         ];
     }
 
@@ -108,7 +107,7 @@ class Index extends Component
         $this->pm_interval_shot = $mould->pm_interval_shot;
         $this->pm_interval_days = $mould->pm_interval_days;
         $this->commissioned_at = optional($mould->commissioned_at)->format('Y-m-d');
-        $this->status = $mould->status ?? 'AVAILABLE';
+        $this->status = $mould->status instanceof \App\Enums\MouldStatus ? $mould->status->value : ($mould->status ?? 'AVAILABLE');
 
         $this->resetValidation();
     }
@@ -155,6 +154,9 @@ class Index extends Component
             ->orderBy('code')
             ->paginate($this->perPage);
 
-        return view('livewire.moulds.index', compact('moulds'));
+        return view('livewire.moulds.index', [
+            'moulds' => $moulds,
+            'statusOptions' => \App\Enums\MouldStatus::cases(),
+        ]);
     }
 }
