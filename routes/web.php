@@ -106,6 +106,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/plants', PlantIndex::class)->name('plants.index');
         Route::get('/zones', ZoneIndex::class)->name('zones.index');
         Route::get('/machines', MachineIndex::class)->name('machines.index');
+        Route::view('/users', 'users.index')->name('users.index'); // Placeholder for now
     });
 
     /**
