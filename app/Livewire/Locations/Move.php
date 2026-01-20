@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Locations;
 
+use Illuminate\Support\Facades\Gate;
 use App\Models\LocationHistory;
 use App\Models\Mould;
 use App\Models\Plant;
@@ -28,10 +29,9 @@ class Move extends Component
         ];
     }
 
-    public function move(): void
+    public function save()
     {
-        // Security Check
-        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(Gate::denies('move_locations'), 403, 'Unauthorized');
 
         $v = $this->validate();
 

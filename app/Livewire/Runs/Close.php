@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Runs;
 
+use Illuminate\Support\Facades\Gate;
 use App\Models\ProductionRun;
 use App\Models\RunDefect;
 use Illuminate\Support\Facades\DB;
@@ -72,7 +73,7 @@ class Close extends Component
         $this->defects = array_values($this->defects);
     }
 
-    public function closeRun(): void
+    public function save() // Renamed from closeRun
     {
         if ($this->run->end_ts) {
             session()->flash('error', 'Run sudah ditutup.');
@@ -80,7 +81,7 @@ class Close extends Component
         }
 
         // Security Check
-        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(Gate::denies('close_runs'), 403, 'Unauthorized'); // Changed authorization check
 
         $v = $this->validate();
 

@@ -18,32 +18,32 @@
                     </x-nav-link>
 
                     {{-- Role landing --}}
-                    @role('Admin')
+                    @can('view_admin_panel')
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')" class="hover:text-purple-600 transition-colors">
                             {{ __('Admin') }}
                         </x-nav-link>
-                    @endrole
+                    @endcan
 
-                    @role('Production|Admin')
+                    @can('view_production_section')
                         <x-nav-link :href="route('production.index')" :active="request()->routeIs('production.index')" class="hover:text-amber-600 transition-colors">
                             {{ __('Production') }}
                         </x-nav-link>
-                    @endrole
+                    @endcan
 
-                    @role('Maintenance|Admin')
+                    @can('view_maintenance_section')
                         <x-nav-link :href="route('maintenance.home')" :active="request()->routeIs('maintenance.home')" class="hover:text-red-600 transition-colors">
                             {{ __('Maintenance') }}
                         </x-nav-link>
-                    @endrole
+                    @endcan
 
-                    @role('QA|Admin')
+                    @can('view_qa_section')
                         <x-nav-link :href="route('qa.index')" :active="request()->routeIs('qa.index')" class="hover:text-emerald-600 transition-colors">
                             {{ __('QA') }}
                         </x-nav-link>
-                    @endrole
+                    @endcan
 
                     {{-- Operasional --}}
-                    @role('Admin|Production|Maintenance|QA|Viewer')
+                    @can('access_operations')
                         <x-nav-link :href="route('moulds.index')" :active="request()->routeIs('moulds.*')">
                             {{ __('Moulds') }}
                         </x-nav-link>
@@ -93,10 +93,10 @@
                                 </x-slot>
                             </x-dropdown>
                         </div>
-                    @endrole
+                    @endcan
 
                     {{-- Admin tools Dropdown --}}
-                    @role('Admin')
+                    @can('view_admin_panel')
                          <div class="hidden sm:flex sm:items-center">
                             <x-dropdown align="right" width="48">
                                 <x-slot name="trigger">
@@ -120,7 +120,7 @@
                                 </x-slot>
                             </x-dropdown>
                         </div>
-                    @endrole
+                    @endcan
                 </div>
 
             </div>
@@ -172,12 +172,14 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @can('access_operations')
             <x-responsive-nav-link :href="route('runs.active')" :active="request()->routeIs('runs.*')">
                 {{ __('Active Runs') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('moulds.index')" :active="request()->routeIs('moulds.*')">
                 {{ __('Moulds') }}
             </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

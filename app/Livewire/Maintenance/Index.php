@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Maintenance;
 
+use Illuminate\Support\Facades\Gate;
 use App\Models\MaintenanceEvent;
 use App\Models\Mould;
 use Livewire\Component;
@@ -153,7 +154,7 @@ class Index extends Component
     public function delete(string $id): void
     {
         // Security Check
-        abort_if(!auth()->user()->hasRole(['Admin', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(Gate::denies('delete_maintenance_events'), 403, 'Unauthorized');
 
         MaintenanceEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Maintenance deleted.');

@@ -15,18 +15,70 @@ class RoleSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        $roles = [
-            'Admin',
-            'Production',
-            'Maintenance',
-            'QA',
-            'Viewer',
-            'Supervisor',
-            'Manager',
+        $permissionsByRole = [
+            'Admin' => [
+                'view_admin_panel',
+                'manage_users',
+                'manage_plants',
+                'manage_zones',
+                'manage_machines',
+                'import_data',
+                'view_audit_logs',
+                'delete_moulds',
+            ],
+            'Production' => [
+                'view_main_dashboard',
+                'view_production_section',
+                'access_operations',
+                'manage_trials',
+                'manage_setups',
+                'close_runs',
+                'manage_moulds',
+                'create_maintenance_events',
+                'move_locations',
+            ],
+            'Maintenance' => [
+                'view_main_dashboard',
+                'view_maintenance_section',
+                'access_operations',
+                'manage_setups',
+                'close_runs',
+                'manage_moulds',
+                'create_maintenance_events',
+                'delete_maintenance_events',
+                'move_locations',
+            ],
+            'QA' => [
+                'view_main_dashboard',
+                'view_qa_section',
+                'access_operations',
+                'manage_trials',
+                'verify_trials',
+            ],
+            'Viewer' => [
+                'view_main_dashboard',
+                'access_operations', // Assuming viewer can view moulds etc.
+            ],
+            'Supervisor' => [
+                'view_main_dashboard',
+                'access_operations',
+            ],
+            'Manager' => [
+                'view_main_dashboard',
+                'access_operations',
+            ],
         ];
 
-        foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role]);
+        foreach ($permissionsByRole as $roleName => $permissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+
+            foreach ($permissions as $permissionName) {
+                // Create permission if it doesn't exist
+                $permission = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permissionName]);
+                
+                // Assign permission to role
+                $role->givePermissionTo($permission);
+            }
         }
     }
 }

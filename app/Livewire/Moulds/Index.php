@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Moulds;
 
+use Illuminate\Support\Facades\Gate;
 use App\Models\Mould;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -99,7 +100,7 @@ class Index extends Component
     public function edit(string $id): void
     {
         // Security: Block Viewer/QA
-        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('manage_moulds'), 403, 'Unauthorized');
 
         $mould = Mould::findOrFail($id);
 
@@ -122,7 +123,7 @@ class Index extends Component
     public function createNew(): void
     {
         // Security: Block Viewer/QA
-        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('manage_moulds'), 403, 'Unauthorized');
 
         $this->resetForm();
         $this->resetValidation();
@@ -132,7 +133,7 @@ class Index extends Component
     {
         // Security check for delete - maybe strict Admin?
         // Let's stick to restricting Viewers/QA
-        abort_if(!auth()->user()->hasRole(['Admin']), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('delete_moulds'), 403, 'Unauthorized');
 
         Mould::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Mould berhasil dihapus.');

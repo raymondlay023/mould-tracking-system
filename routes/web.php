@@ -36,32 +36,32 @@ Route::middleware(['auth'])->group(function () {
      * Kalau sudah pakai Gate: ganti middleware ini jadi ->middleware(['can:view-dashboard'])
      */
     Route::get('/dashboard', Summary::class)
-        ->middleware(['role:Admin|Production|Maintenance|QA|Viewer'])
+        ->middleware(['can:view_main_dashboard'])
         ->name('dashboard');
 
     /**
      * Area landing per role
      */
     Route::get('/admin', \App\Livewire\Admin\Dashboard::class)
-        ->middleware(['role:Admin'])
+        ->middleware(['can:view_admin_panel'])
         ->name('admin.index');
 
     Route::get('/production', \App\Livewire\Production\Dashboard::class)
-        ->middleware(['role:Production|Admin'])
+        ->middleware(['can:view_production_section'])
         ->name('production.index');
 
     Route::get('/maintenance', \App\Livewire\Maintenance\Dashboard::class)
-        ->middleware(['role:Maintenance|Admin'])
+        ->middleware(['can:view_maintenance_section'])
         ->name('maintenance.home');
 
     Route::get('/qa', \App\Livewire\Qa\Dashboard::class)
-        ->middleware(['role:QA|Admin'])
+        ->middleware(['can:view_qa_section'])
         ->name('qa.index');
 
     /**
      * Operasional umum (semua role yang boleh operasional)
      */
-    Route::middleware(['role:Admin|Production|Maintenance|QA|Viewer'])->group(function () {
+    Route::middleware(['can:access_operations'])->group(function () {
         // Mould
         Route::get('/moulds', MouldIndex::class)->name('moulds.index');
         Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
@@ -94,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
     /**
      * Admin only (master data + tools)
      */
-    Route::middleware(['role:Admin'])->group(function () {
+    Route::middleware(['can:view_admin_panel'])->group(function () {
         // Import & QR
         Route::get('/import/moulds', MouldImport::class)->name('import.moulds');
         Route::get('/qr/moulds', MouldQrBatch::class)->name('qr.moulds');
