@@ -51,7 +51,7 @@
                 @forelse($events as $e)
                     <tr class="border-b">
                         <td class="py-2 text-xs">
-                            <div>{{ $e->end_ts }}</div>
+                            <div>{{ \Carbon\Carbon::parse($e->end_ts)->setTimezone(auth()->user()->timezone ?? 'Asia/Jakarta')->format('Y-m-d H:i') }}</div>
                             <div class="text-gray-500">{{ $e->plant_name }} / {{ $e->zone_code }}</div>
                         </td>
                         <td>

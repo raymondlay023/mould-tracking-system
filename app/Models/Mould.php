@@ -30,10 +30,14 @@ class Mould extends Model
         'max_tonnage_t',
         'pm_interval_shot',
         'pm_interval_days',
+        'ideal_cycle_time', // [NEW] for OEE
         'commissioned_at',
         'rmp_last_at',
         'rmp_approved_by',
         'status',
+        'total_shots',
+        'last_pm_at_shot', 
+        'last_pm_at_ts',
     ];
 
     protected $casts = [
@@ -44,6 +48,7 @@ class Mould extends Model
         'max_tonnage_t' => 'integer',
         'pm_interval_shot' => 'integer',
         'pm_interval_days' => 'integer',
+        'ideal_cycle_time' => 'float',
         'status' => \App\Enums\MouldStatus::class,
     ];
 
@@ -55,6 +60,7 @@ class Mould extends Model
                 'code','name','cavities','customer','resin',
                 'min_tonnage_t','max_tonnage_t',
                 'pm_interval_shot','pm_interval_days',
+                'ideal_cycle_time',
                 'commissioned_at','status',
                 'rmp_last_at','rmp_approved_by',
             ])

@@ -68,31 +68,40 @@ class Index extends Component
         ];
     }
 
-    public function save(): void
+    public function save(\App\Actions\Moulds\CreateMouldAction $createAction): void
     {
         // Security: Block Viewer/QA from writing
-        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('manage_moulds'), 403, 'Unauthorized');
 
-
+        // Validation Rules definitions (still needed for binding, or we can use the Action's validator if we move it out)
+        // Since Livewire does real-time validation, we generally keep rules() here. 
+        // But Action also validates. 
+        // For now, let's keep Livewire validation for UX, but delegate DB logic to Action.
+        
         $validated = $this->validate();
 
-        // extra rule: min <= max (kalau dua-duanya ada)
-        if ($this->min_tonnage_t !== null && $this->max_tonnage_t !== null) {
+        // extra rule: min < max (moved to action for create, but UI needs it too?)
+        // Let's keep UI feedback here for now to ensure Errors bag is populated.
+         if ($this->min_tonnage_t !== null && $this->max_tonnage_t !== null) {
             if ($this->min_tonnage_t > $this->max_tonnage_t) {
                 $this->addError('min_tonnage_t', 'Min tonnage tidak boleh lebih besar dari max tonnage.');
                 return;
             }
         }
-
-        // trim code biar rapi
         $validated['code'] = trim($validated['code']);
 
-        Mould::updateOrCreate(
-            ['id' => $this->mouldId],
-            $validated
-        );
-
-        session()->flash('success', $this->mouldId ? 'Mould berhasil diupdate.' : 'Mould berhasil ditambahkan.');
+        if ($this->mouldId) {
+            // Update Logic (Legacy / Todo: UpdateMouldAction)
+             Mould::updateOrCreate(
+                ['id' => $this->mouldId],
+                $validated
+            );
+             session()->flash('success', 'Mould berhasil diupdate.');
+        } else {
+            // Create Logic via Action
+            $createAction->execute($validated);
+             session()->flash('success', 'Mould berhasil ditambahkan.');
+        }
 
         $this->resetForm();
     }

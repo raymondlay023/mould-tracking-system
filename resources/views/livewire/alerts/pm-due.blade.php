@@ -103,7 +103,7 @@
                     </div>
                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
                         <div class="text-xs text-gray-400 uppercase tracking-wide">Last Maint</div>
-                        <div class="font-bold text-gray-900">{{ $r->last_maint_end_ts ? \Carbon\Carbon::parse($r->last_maint_end_ts)->format('d M') : '-' }}</div>
+                        <div class="font-bold text-gray-900">{{ $r->last_maint_end_ts ? \Carbon\Carbon::parse($r->last_maint_end_ts)->setTimezone(auth()->user()->timezone ?? 'Asia/Jakarta')->format('d M') : '-' }}</div>
                         <div class="text-xs text-gray-500">{{ $r->last_maint_machine_code ?? 'N/A' }}</div>
                     </div>
                 </div>

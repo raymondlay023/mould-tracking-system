@@ -90,7 +90,7 @@
                     <div class="p-4 hover:bg-gray-50">
                         <div class="flex justify-between mb-1">
                             <span class="font-medium text-sm text-gray-900">{{ $e->mould->code }}</span>
-                            <span class="text-xs text-gray-500">{{ $e->end_ts->format('M d, H:i') }}</span>
+                            <span class="text-xs text-gray-500">{{ $e->end_ts->setTimezone(auth()->user()->timezone ?? 'Asia/Jakarta')->format('M d, H:i') }}</span>
                         </div>
                         <div class="text-sm text-gray-600">{{ $e->description ?? $e->type }}</div>
                         <div class="mt-2 flex items-center justify-between">

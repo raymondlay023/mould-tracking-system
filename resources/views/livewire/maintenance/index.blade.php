@@ -81,6 +81,11 @@
                         <textarea wire:model.defer="parts_used" class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" rows="2" placeholder="List parts replaced..."></textarea>
                     </div>
 
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Cost</label>
+                        <input type="number" wire:model.defer="cost" class="w-full rounded-xl border-gray-200 bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="Optional cost...">
+                    </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Next Due Shot</label>

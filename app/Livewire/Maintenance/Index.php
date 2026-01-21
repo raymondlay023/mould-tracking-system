@@ -30,7 +30,7 @@ class Index extends Component
 
     public ?string $parts_used = null;
 
-    public int $downtime_min = 0;
+    public ?int $downtime_min = null;
 
     public ?int $cost = null;
 
@@ -52,21 +52,44 @@ class Index extends Component
         $this->resetForm();
     }
 
+    // Helper: Convert UTC DB value -> User Local Time string (for Input)
+    private function toUserTime($date): string
+    {
+        if (!$date) return '';
+        $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
+        return \Carbon\Carbon::parse($date)->setTimezone($tz)->format('Y-m-d\TH:i');
+    }
+
+    // Helper: Convert User Input string -> UTC Carbon object (for DB)
+    private function toUtc(?string $dateString): ?\Carbon\Carbon
+    {
+        if (!$dateString) return null;
+        $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
+        return \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $dateString, $tz)->setTimezone('UTC');
+    }
+
     private function resetForm(): void
     {
         $this->idEdit = null;
         $this->mould_id = '';
-        $this->start_ts = now()->subMinutes(30)->format('Y-m-d\TH:i');
-        $this->end_ts = now()->format('Y-m-d\TH:i');
+        
+        // Default Start: 30 mins ago logic, but in User Time
+        $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
+        $nowUser = now()->setTimezone($tz);
+        
+        $this->start_ts = $nowUser->copy()->subMinutes(30)->format('Y-m-d\TH:i');
+        $this->end_ts = $nowUser->format('Y-m-d\TH:i');
+        
         $this->type = 'PM';
         $this->description = null;
         $this->parts_used = null;
-        $this->downtime_min = 0;
+        $this->downtime_min = null;
         $this->cost = null;
         $this->next_due_shot = null;
         $this->next_due_date = null;
         $this->performed_by = auth()->user()?->name;
         $this->notes = null;
+        $this->resetValidation();
     }
 
     protected function rules(): array
@@ -74,23 +97,22 @@ class Index extends Component
         return [
             'mould_id' => ['required', 'exists:moulds,id'],
             'start_ts' => ['required', 'date'],
-            'end_ts' => ['required', 'date', 'after:start_ts'],
             'type' => ['required', 'in:PM,CM'],
             'description' => ['nullable', 'string', 'max:255'],
-            'parts_used' => ['nullable', 'string', 'max:5000'],
-            'downtime_min' => ['required', 'integer', 'min:0'],
-            'cost' => ['nullable', 'integer', 'min:0'],
             'next_due_shot' => ['nullable', 'integer', 'min:0'],
             'next_due_date' => ['nullable', 'date'],
             'performed_by' => ['nullable', 'string', 'max:100'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'end_ts' => ['required', 'date', 'after:start_ts'],
+            'downtime_min' => ['required', 'integer', 'min:0'],
+            'parts_used' => ['nullable', 'string', 'max:5000'],
+            'cost' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
     public function createNew(): void
     {
         $this->resetForm();
-        $this->resetValidation();
     }
 
     public function edit(string $id): void
@@ -98,8 +120,11 @@ class Index extends Component
         $e = MaintenanceEvent::findOrFail($id);
         $this->idEdit = $e->id;
         $this->mould_id = $e->mould_id;
-        $this->start_ts = $e->start_ts?->format('Y-m-d\TH:i') ?? '';
-        $this->end_ts = $e->end_ts?->format('Y-m-d\TH:i') ?? '';
+        
+        // Convert DB (UTC) -> User Time
+        $this->start_ts = $this->toUserTime($e->start_ts);
+        $this->end_ts = $this->toUserTime($e->end_ts);
+        
         $this->type = $e->type;
         $this->description = $e->description;
         $this->parts_used = $e->parts_used;
@@ -115,12 +140,12 @@ class Index extends Component
     public function save(): void
     {
         // Security Check
-        abort_if(!auth()->user()->hasRole(['Admin', 'Production', 'Maintenance']), 403, 'Unauthorized');
+        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403, 'Unauthorized');
 
         $v = $this->validate();
 
         $loc = \App\Models\LocationHistory::query()
-            ->where('mould_id', '=', $v['mould_id'])
+            ->where('mould_id', '=', $this->mould_id)
             ->whereNull('end_ts')
             ->first();
 
@@ -129,25 +154,38 @@ class Index extends Component
 
         if ($loc) {
             $autoPlantId = $loc->plant_id;
-
             if ($loc->location === 'MACHINE') {
                 $autoMachineId = $loc->machine_id;
             }
         }
 
+        // Always COMPLETED for Log
+        $startTs = $this->toUtc($this->start_ts);
+        $endTs = $this->toUtc($this->end_ts);
+
         MaintenanceEvent::updateOrCreate(
             ['id' => $this->idEdit],
             [
-                ...$v,
-                'next_due_date' => $v['next_due_date'] ?: null,
-                'performed_by' => $v['performed_by'] ?: (auth()->user()?->name),
+                'mould_id' => $this->mould_id,
+                'start_ts' => $startTs,
+                'type' => $this->type,
+                'description' => $this->description,
+                'next_due_shot' => $this->next_due_shot,
+                'next_due_date' => $this->next_due_date ?: null,
+                'performed_by' => $this->performed_by ?: (auth()->user()?->name),
+                'notes' => $this->notes,
                 'machine_id' => $autoMachineId,
                 'plant_id' => $autoPlantId,
-
+                
+                'status' => 'COMPLETED',
+                'end_ts' => $endTs,
+                'downtime_min' => $this->downtime_min,
+                'parts_used' => $this->parts_used,
+                'cost' => $this->cost,
             ]
         );
 
-        session()->flash('success', $this->idEdit ? 'Maintenance updated.' : 'Maintenance created.');
+        session()->flash('success', $this->idEdit ? 'Maintenance updated.' : 'Maintenance logged.');
         $this->createNew();
     }
 
@@ -163,7 +201,7 @@ class Index extends Component
 
     public function render()
     {
-        $moulds = Mould::orderBy('code')->get();
+        $moulds = Mould::orderBy('code', 'asc')->get();
 
         $events = MaintenanceEvent::query()
             ->with('mould')

@@ -59,6 +59,15 @@ Route::middleware(['auth'])->group(function () {
         ->name('qa.index');
 
     /**
+     * Mobile App (Shop Floor)
+     */
+    Route::prefix('app')->name('mobile.')->group(function () {
+        Route::get('/dashboard', \App\Livewire\Mobile\Dashboard::class)->name('dashboard');
+        Route::get('/scan', \App\Livewire\Mobile\Scanner::class)->name('scanner');
+        Route::get('/moulds/{mould}', \App\Livewire\Mobile\MouldDetail::class)->name('mould-detail');
+    });
+
+    /**
      * Operasional umum (semua role yang boleh operasional)
      */
     Route::middleware(['can:access_operations'])->group(function () {
@@ -75,6 +84,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/runs/{run}/close', CloseRun::class)->name('runs.close');
 
         // Maintenance feature (CRUD event)
+        Route::get('/maintenance/work-orders', \App\Livewire\Maintenance\WorkOrders::class)->name('maintenance.work-orders');
         Route::get('/maintenance/events', MaintenanceIndex::class)->name('maintenance.index');
 
         // Location move

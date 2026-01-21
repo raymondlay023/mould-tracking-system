@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MaintenanceEvent extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, \Spatie\Activitylog\Traits\LogsActivity;
 
     protected $table = 'maintenance_events';
 
@@ -22,6 +22,7 @@ class MaintenanceEvent extends Model
         'next_due_shot', 'next_due_date',
         'performed_by', 'notes',
         'machine_id', 'plant_id',
+        'status',
     ];
 
     protected $casts = [
@@ -46,5 +47,23 @@ class MaintenanceEvent extends Model
     public function plant()
     {
         return $this->belongsTo(Plant::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereNull('end_ts');
+    }
+    public function getActivitylogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return \Spatie\Activitylog\LogOptions::defaults()
+            ->useLogName('maintenance_event')
+            ->logOnly([
+                'status',
+                'start_ts', 'end_ts',
+                'description', 'notes',
+                'downtime_min', 'cost'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
     }
 }

@@ -88,7 +88,7 @@
         </div>
 
         <div class="mt-6">
-            <button type="button" wire:click="closeRun"
+            <button type="button" wire:click="save"
                 class="px-4 py-2 rounded bg-gray-900 text-white text-sm"
                 @if($run->end_ts) disabled @endif>
                 Close Run

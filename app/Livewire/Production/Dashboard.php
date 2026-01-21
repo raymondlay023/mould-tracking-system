@@ -48,6 +48,25 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
-        return view('livewire.production.dashboard', compact('activeRuns', 'availableMoulds', 'topNg'));
+        // 4. OEE Performance (Recent Closed Runs)
+        $closedRuns = \App\Models\ProductionRun::with('mould')
+            ->whereNotNull('end_ts')
+            ->latest('end_ts')
+            ->limit(5)
+            ->get();
+            
+        $recentOee = $closedRuns->map(function ($run) {
+            $stats = \App\Stats\OeeCalculator::calculate($run);
+            return (object) [
+                'mould' => $run->mould->code,
+                'end_ts' => $run->end_ts,
+                'oee' => $stats['oee'] * 100,
+                'availability' => $stats['availability'] * 100,
+                'performance' => $stats['performance'] * 100,
+                'quality' => $stats['quality'] * 100,
+            ];
+        });
+
+        return view('livewire.production.dashboard', compact('activeRuns', 'availableMoulds', 'topNg', 'recentOee'));
     }
 }

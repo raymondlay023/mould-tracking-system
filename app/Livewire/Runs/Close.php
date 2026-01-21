@@ -73,7 +73,7 @@ class Close extends Component
         $this->defects = array_values($this->defects);
     }
 
-    public function save() // Renamed from closeRun
+    public function save()
     {
         if ($this->run->end_ts) {
             session()->flash('error', 'Run sudah ditutup.');
@@ -81,65 +81,28 @@ class Close extends Component
         }
 
         // Security Check
-        abort_if(Gate::denies('close_runs'), 403, 'Unauthorized'); // Changed authorization check
+        abort_if(Gate::denies('close_runs'), 403, 'Unauthorized');
 
-        $v = $this->validate();
+        $validated = $this->validate();
 
-        $cav = (int) $this->run->cavities_snapshot;
-        $part_total = (int) $v['shot_total'] * $cav;
+        try {
+            // Prepare Data for Action
+            $data = $validated;
+            $data['defects'] = $this->defects;
 
-        // Rule utama: ok+ng harus = part_total
-        if (($v['ok_part'] + $v['ng_part']) !== $part_total) {
-            $this->addError('ok_part', "ok_part + ng_part harus = part_total ({$part_total}).");
-            return;
+            $closeRunAction = app(\App\Actions\Production\CloseRunAction::class);
+            $closeRunAction->execute($this->run, $data);
+
+            session()->flash('success', 'Run berhasil ditutup.');
+            // reload for display
+            $this->run->refresh()->load(['mould','machine.plant','machine.zone','defects']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Re-throw to show errors in Livewire
+            throw $e;
+        } catch (\Exception $e) {
+            $this->addError('base', 'Error closing run: ' . $e->getMessage());
         }
-
-        // Hitung total defect qty (abaikan row kosong)
-        $filtered = collect($this->defects)
-            ->filter(fn($d) => trim((string)($d['defect_code'] ?? '')) !== '' || (int)($d['qty'] ?? 0) > 0)
-            ->map(function($d){
-                return [
-                    'defect_code' => strtoupper(trim((string)$d['defect_code'])),
-                    'qty' => (int)($d['qty'] ?? 0),
-                ];
-            })
-            ->values();
-
-        $sumDef = (int) $filtered->sum('qty');
-        if ($sumDef !== (int)$v['ng_part']) {
-            $this->addError('ng_part', "Total qty defect ({$sumDef}) harus sama dengan ng_part ({$v['ng_part']}).");
-            return;
-        }
-
-        DB::transaction(function () use ($v, $part_total, $filtered) {
-            // update run
-            $this->run->update([
-                'end_ts' => now(),
-                'shot_total' => (int)$v['shot_total'],
-                'part_total' => $part_total,
-                'ok_part' => (int)$v['ok_part'],
-                'ng_part' => (int)$v['ng_part'],
-                'cycle_time_avg_sec' => $v['cycle_time_avg_sec'],
-                'notes' => $v['notes'],
-            ]);
-
-            // replace defect rows
-            RunDefect::where('run_id', '=', $this->run->id, 'and')->delete();
-            foreach ($filtered as $d) {
-                RunDefect::create([
-                    'run_id' => $this->run->id,
-                    'defect_code' => $d['defect_code'],
-                    'qty' => $d['qty'],
-                ]);
-            }
-
-            // update mould status back
-            $this->run->mould->update(['status' => 'AVAILABLE']);
-        });
-
-        session()->flash('success', 'Run berhasil ditutup.');
-        // reload for display
-        $this->run->refresh()->load(['mould','machine.plant','machine.zone','defects']);
     }
 
     public function render()

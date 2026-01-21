@@ -11,7 +11,7 @@
     </div>
 
     {{-- Stats Row --}}
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div class="text-sm font-medium text-gray-500">Active Lines</div>
             <div class="text-3xl font-bold text-blue-600 mt-2">{{ $activeRuns->count() }}</div>
@@ -26,6 +26,15 @@
                 $avgRate = $topNg->avg(fn($t) => ($t->ng_sum + $t->ok_sum) > 0 ? ($t->ng_sum / ($t->ng_sum + $t->ok_sum)) * 100 : 0);
             @endphp
             <div class="text-3xl font-bold text-{{ $avgRate > 5 ? 'red' : 'gray' }}-600 mt-2">{{ number_format($avgRate ?? 0, 1) }}%</div>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+             <div class="text-sm font-medium text-gray-500">Avg OEE (Last 5 Runs)</div>
+             @php
+                $avgOee = $recentOee->avg('oee');
+             @endphp
+             <div class="text-3xl font-bold text-{{ $avgOee < 50 ? 'red' : ($avgOee < 85 ? 'yellow' : 'green') }}-600 mt-2">
+                 {{ number_format($avgOee ?? 0, 1) }}%
+             </div>
         </div>
     </div>
 
@@ -56,6 +65,37 @@
                 @empty
                     <div class="p-8 text-center text-gray-400 text-sm">No active runs.</div>
                 @endforelse
+            </div>
+        </div>
+
+        {{-- OEE Stats --}}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6">
+            <div class="px-6 py-4 border-b border-gray-50 bg-gray-50/50">
+                <h3 class="font-semibold text-gray-900">Recent Efficiency (Last 5 Runs)</h3>
+            </div>
+            <div class="divide-y divide-gray-100">
+                @foreach($recentOee as $oee)
+                    <div class="p-4 flex items-center justify-between">
+                        <div>
+                            <div class="font-medium text-gray-900 text-sm">{{ $oee->mould }}</div>
+                            <div class="text-xs text-gray-500">{{ $oee->end_ts->format('d M H:i') }}</div>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs font-medium">
+                            <div class="text-center">
+                                <span class="block text-gray-400">Perf</span>
+                                <span class="text-blue-600">{{ number_format($oee->performance, 0) }}%</span>
+                            </div>
+                            <div class="text-center">
+                                <span class="block text-gray-400">Qual</span>
+                                <span class="text-green-600">{{ number_format($oee->quality, 0) }}%</span>
+                            </div>
+                            <div class="text-center px-2 py-1 bg-gray-50 rounded">
+                                <span class="block text-gray-400">OEE</span>
+                                <span class="text-{{ $oee->oee < 85 ? 'amber' : 'emerald' }}-600 font-bold">{{ number_format($oee->oee, 0) }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
             </div>
         </div>
 

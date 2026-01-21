@@ -58,6 +58,10 @@
                             </span>
                         </x-nav-link>
 
+                        <x-nav-link :href="route('maintenance.work-orders')" :active="request()->routeIs('maintenance.work-orders')">
+                            {{ __('Work Orders') }}
+                        </x-nav-link>
+
                         <x-nav-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
                             {{ __('Maint. Events') }}
                         </x-nav-link>
@@ -126,7 +130,9 @@
             </div>
 
              <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
+            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-2">
+                <livewire:partials.notification-bell />
+                
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center gap-2 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-full text-gray-500 bg-gray-50 hover:bg-white hover:text-gray-700 hover:shadow-sm focus:outline-none transition ease-in-out duration-150">

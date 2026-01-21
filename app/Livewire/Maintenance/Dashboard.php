@@ -51,6 +51,7 @@ class Dashboard extends Component
 
         // 2. Recent Maintenance Events
         $recentEvents = MaintenanceEvent::with('mould')
+            ->where('status', 'COMPLETED')
             ->orderByDesc('end_ts')
             ->limit(10)
             ->get();

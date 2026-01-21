@@ -20,9 +20,11 @@ class Index extends Component
         $logs = Activity::query()
             ->with('causer')
             ->when($this->search !== '', function ($q) {
-                $q->where('description', 'like', "%{$this->search}%")
-                  ->orWhere('log_name', 'like', "%{$this->search}%")
-                  ->orWhere('subject_type', 'like', "%{$this->search}%");
+                $q->where(function ($sub) {
+                    $sub->where('description', 'like', "%{$this->search}%")
+                        ->orWhere('log_name', 'like', "%{$this->search}%")
+                        ->orWhere('subject_type', 'like', "%{$this->search}%");
+                });
             })
             ->latest()
             ->paginate($this->perPage);
