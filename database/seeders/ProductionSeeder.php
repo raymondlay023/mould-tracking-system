@@ -14,6 +14,7 @@ use App\Models\RunDefect;
 use App\Models\SetupEvent;
 use App\Models\TrialEvent;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ProductionSeeder extends Seeder
@@ -105,6 +106,7 @@ class ProductionSeeder extends Seeder
                     'id' => Str::uuid(),
                     'mould_id' => $m->id,
                     'machine_id' => $machines->random()->id,
+                    'cavities_snapshot' => $cav,
                     'start_ts' => $start,
                     'end_ts' => $end,
                     'shot_total' => $shot,
@@ -120,16 +122,23 @@ class ProductionSeeder extends Seeder
                     $left = $ng;
                     $rows = rand(1, 3);
 
-                    for ($d = 0; $d < $rows; $d++) {
-                        $qty = ($d === $rows - 1) ? $left : rand(1, max(1, (int) ($left / 2)));
+                    for ($d = 0; $d < $rows && $left > 0; $d++) {
+                        if ($d === $rows - 1) {
+                            $qty = $left;
+                        } else {
+                            $maxQty = max(1, (int) ($left / 2));
+                            $qty = rand(1, min($left, $maxQty));
+                        }
                         $left -= $qty;
 
-                        RunDefect::create([
-                            'id' => Str::uuid(),
-                            'run_id' => $run->id,
-                            'defect_code' => $defects[array_rand($defects)],
-                            'qty' => $qty,
-                        ]);
+                        if ($qty > 0) {
+                            RunDefect::create([
+                                'id' => Str::uuid(),
+                                'run_id' => $run->id,
+                                'defect_code' => $defects[array_rand($defects)],
+                                'qty' => $qty,
+                            ]);
+                        }
                     }
                 }
             }

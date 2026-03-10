@@ -23,44 +23,42 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::transaction(function () {
-            // ===== 0) Optional: Clear tables (HATI-HATI kalau sudah ada data nyata)
-            $tables = [
-                'run_defects',
-                'production_runs',
-                'setup_events',
-                'trial_events',
-                'maintenance_events',
-                'location_histories',
-                'moulds',
-                'machines',
-                'zones',
-                'plants',
-            ];
+        // ===== 0) Optional: Clear tables (HATI-HATI kalau sudah ada data nyata)
+        $tables = [
+            'run_defects',
+            'production_runs',
+            'setup_events',
+            'trial_events',
+            'maintenance_events',
+            'location_histories',
+            'moulds',
+            'machines',
+            'zones',
+            'plants',
+        ];
 
-            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            foreach ($tables as $t) {
-                DB::table($t)->truncate();
-            }
-            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        foreach ($tables as $t) {
+            DB::table($t)->truncate();
+        }
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-            // ===== 1) Users
-            if (User::count() === 0) {
-                $this->makeUser('Admin Demo', 'admin@demo.local', 'Admin');
-                $this->makeUser('Prod Demo', 'prod@demo.local', 'Production');
-                $this->makeUser('Maint Demo', 'maint@demo.local', 'Maintenance');
-                $this->makeUser('QA Demo', 'qa@demo.local', 'QA');
-                $this->makeUser('Viewer Demo', 'viewer@demo.local', 'Viewer');
-            }
+        // ===== 1) Users
+        if (User::count() === 0) {
+            $this->makeUser('Admin Demo', 'admin@demo.local', 'Admin');
+            $this->makeUser('Prod Demo', 'prod@demo.local', 'Production');
+            $this->makeUser('Maint Demo', 'maint@demo.local', 'Maintenance');
+            $this->makeUser('QA Demo', 'qa@demo.local', 'QA');
+            $this->makeUser('Viewer Demo', 'viewer@demo.local', 'Viewer');
+        }
 
-            // ===== Call other seeders
-            $this->call([
-                PlantSeeder::class,
-                MouldSeeder::class,
-                ProductionSeeder::class,
-                MaintenanceSeeder::class,
-            ]);
-        });
+        // ===== Call other seeders
+        $this->call([
+            PlantSeeder::class,
+            MouldSeeder::class,
+            ProductionSeeder::class,
+            MaintenanceSeeder::class,
+        ]);
     }
 
     private function makeUser(string $name, string $email, string $role): void
