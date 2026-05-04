@@ -32,14 +32,24 @@ GRANT ALL PRIVILEGES ON DATABASE mould_tracking TO mould_user;
 
 ### Step 2: Update `.env` Configuration
 
-**MySQL:**
+**MySQL (Local Development):**
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=mould_tracking
 DB_USERNAME=mould_user
-DB_PASSWORD=strong_password
+DB_PASSWORD=mould_pass
+```
+
+**MySQL (Docker Production):**
+```env
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=mould_tracking
+DB_USERNAME=mould_user
+DB_PASSWORD=mould_pass
 ```
 
 **PostgreSQL:**
@@ -49,7 +59,7 @@ DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_DATABASE=mould_tracking
 DB_USERNAME=mould_user
-DB_PASSWORD=strong_password
+DB_PASSWORD=mould_pass
 ```
 
 ### Step 3: Run Migrations
@@ -61,12 +71,12 @@ php artisan migrate --force
 ### Step 4: Seed Data (if needed)
 
 ```bash
-# Seed roles and admin user
-php artisan db:seed --class=RoleSeeder
-php artisan db:seed --class=AdminUserSeeder
-
-# Or seed demo data
+# Seed roles and demo data (includes admin user)
 php artisan db:seed
+
+# Or seed specific seeders
+php artisan db:seed --class=RoleSeeder
+php artisan db:seed --class=DemoDataSeeder
 ```
 
 ## Method 2: Data Migration (For Existing Data)
@@ -115,12 +125,13 @@ psql -U mould_user -d mould_tracking -f converted_dump.sql
 
 ```bash
 # Update .env to production database
+# Then verify data
 php artisan tinker
 
-# Verify data
->>> \App\Models\Mould::count()
->>> \App\Models\ProductionRun::count()
->>> \App\Models\MaintenanceEvent::count()
+>>> App\Models\Mould::count()
+>>> App\Models\ProductionRun::count()
+>>> App\Models\MaintenanceEvent::count()
+>>> App\Models\User::count()
 ```
 
 ## Method 3: Laravel Eloquent Export/Import (Safest)
@@ -136,7 +147,7 @@ Create a custom Artisan command:
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\{Mould, ProductionRun, MaintenanceEvent, Plant, Zone, Machine};
+use App\Models\{Mould, ProductionRun, MaintenanceEvent, Plant, Zone, Machine, User};
 
 class ExportData extends Command
 {
@@ -146,6 +157,7 @@ class ExportData extends Command
     public function handle()
     {
         $data = [
+            'users' => User::all()->toArray(),
             'plants' => Plant::all()->toArray(),
             'zones' => Zone::all()->toArray(),
             'machines' => Machine::all()->toArray(),
@@ -181,7 +193,7 @@ Create import command:
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\{Mould, ProductionRun, MaintenanceEvent, Plant, Zone, Machine};
+use App\Models\{Mould, ProductionRun, MaintenanceEvent, Plant, Zone, Machine, User};
 
 class ImportData extends Command
 {
@@ -191,6 +203,10 @@ class ImportData extends Command
     public function handle()
     {
         $data = json_decode(file_get_contents($this->argument('file')), true);
+
+        foreach ($data['users'] as $item) {
+            User::create($item);
+        }
 
         foreach ($data['plants'] as $item) {
             Plant::create($item);
@@ -277,6 +293,32 @@ cp database/database.sqlite.backup database/database.sqlite
 - [MySQL Migration Best Practices](https://dev.mysql.com/doc/refman/8.0/en/migration.html)
 - [PostgreSQL Migration Guide](https://www.postgresql.org/docs/current/migration.html)
 
+## Current System Configuration
+
+### Local Development (SQLite)
+```env
+DB_CONNECTION=sqlite
+# Database file: database/database.sqlite
+```
+
+### Docker Production (MySQL)
+```env
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=mould_tracking
+DB_USERNAME=mould_user
+DB_PASSWORD=mould_pass
+```
+
+### Demo Users
+After running `php artisan db:seed`, the following demo users are available:
+- **Admin**: `admin@demo.local` / `password`
+- **Production**: `prod@demo.local` / `password`
+- **Maintenance**: `maint@demo.local` / `password`
+- **QA**: `qa@demo.local` / `password`
+- **Viewer**: `viewer@demo.local` / `password`
+
 ---
 
-**Last Updated**: January 2026
+**Last Updated**: May 2026
