@@ -1,8 +1,0 @@
-services:
-  app:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile.dev
-    environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
