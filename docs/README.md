@@ -17,16 +17,17 @@ A comprehensive production management system for tracking injection moulds throu
 
 ## 🚀 Technology Stack
 
-- **Backend**: Laravel 12 (PHP 8.2+)
+- **Backend**: Laravel 12 (PHP 8.3+)
 - **Frontend**: Livewire 3, Tailwind CSS 3, Alpine.js
-- **Database**: SQLite (dev), MySQL/PostgreSQL (production)
+- **Database**: SQLite (local dev), MySQL (Docker production)
 - **Authentication**: Laravel Breeze
-- **Permissions**: Spatie Laravel Permission
-- **Activity Log**: Spatie Laravel Activity Log
-- **Excel**: Maatwebsite Excel
-- **QR Codes**: SimpleSoftwareIO Simple QR Code
+- **Permissions**: Spatie Laravel Permission (v6.25.0)
+- **Activity Log**: Spatie Laravel Activity Log (v4.12.3)
+- **Excel**: Maatwebsite Excel (v3.1.69)
+- **QR Codes**: SimpleSoftwareIO Simple QR Code (v4.2.0)
 - **Build Tool**: Vite 7
 - **Testing**: PHPUnit 11
+- **Container**: Docker (production deployment only)
 
 ## 📦 Installation
 
@@ -78,27 +79,37 @@ A comprehensive production management system for tracking injection moulds throu
 
 7. **Access the application**
    - URL: `http://localhost:8000`
-   - Default admin credentials (if seeded):
-     - Email: `admin@example.com`
-     - Password: `password`
+   - Demo users (created by seeder):
+     - Admin: `admin@demo.local` / `password`
+     - Production: `prod@demo.local` / `password`
+     - Maintenance: `maint@demo.local` / `password`
+     - QA: `qa@demo.local` / `password`
+     - Viewer: `viewer@demo.local` / `password`
 
-### 🐳 Docker Development
+### 🐳 Docker Production
 
 1. **Start containers**
    ```bash
    docker-compose up -d
    ```
 
-2. **Install dependencies inside container**
+2. **Run initial setup** (first time only)
    ```bash
-   docker-compose exec app composer install
+   docker-compose exec app cp .env.example .env
    docker-compose exec app php artisan key:generate
-   docker-compose exec app php artisan migrate
-   docker-compose exec app php artisan db:seed
+   docker-compose exec app php artisan migrate --force
+   docker-compose exec app php artisan db:seed --force
    ```
 
 3. **Access the application**
-   - URL: `http://localhost`
+   - URL: `http://localhost:8000`
+   - phpMyAdmin: `http://localhost:8081`
+   - Demo users (same as local development):
+     - Admin: `admin@demo.local` / `password`
+     - Production: `prod@demo.local` / `password`
+     - Maintenance: `maint@demo.local` / `password`
+     - QA: `qa@demo.local` / `password`
+     - Viewer: `viewer@demo.local` / `password`
 
 ## 🧪 Testing
 
@@ -230,6 +241,10 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment guide including:
 See [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for step-by-step instructions.
 
 ## 🤝 Contributing
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for detailed contribution guidelines.
+
+### Quick Contribution Steps
 
 1. Create a feature branch
 2. Write tests for new features

@@ -1,0 +1,43 @@
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in production)
+README.md
+docs/
+
+# Docker files (not needed in production)
+docker/
+docker-compose*.yml
+.dockerignore
+
+# Development dependencies
+node_modules/
+npm-debug.log*
+
+# Tests (not needed in production)
+tests/
+.phpunit.xml
+.phpunit.result.cache
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (will be mounted or set via env vars)
+.env*
+!.env.example
+
+# Laravel storage (will be created at runtime)
+storage/app/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+
+# Bootstrap cache (will be created at runtime)
+bootstrap/cache/*

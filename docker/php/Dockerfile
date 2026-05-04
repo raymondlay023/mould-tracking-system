@@ -1,31 +1,46 @@
-FROM php:8.3-cli-alpine
+FROM php:8.3-fpm-alpine
 
-# Install system + build dependencies
-RUN apk update && apk add --no-cache \
-    $PHPIZE_DEPS \
-    bash \
-    git \
-    unzip \
+RUN apk add --no-cache \
     icu-dev \
     oniguruma-dev \
     libzip-dev \
     mysql-client \
-    curl
+    curl \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev
 
-# PHP extensions
-RUN docker-php-ext-install \
-    pdo \
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+ && docker-php-ext-install \
     pdo_mysql \
     mbstring \
     intl \
     zip \
-    pcntl
+    pcntl \
+    gd
 
-# Install Composer (safe method)
+# Composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/bin \
     --filename=composer
 
 WORKDIR /var/www/html
 
-EXPOSE 8000
+# Copy app source
+COPY . .
+
+# Install prod deps only
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction
+
+# Laravel optimizations
+RUN php artisan config:clear \
+ && php artisan config:cache \
+ && php artisan route:cache \
+ && php artisan view:cache
+
+RUN chmod -R 755 storage bootstrap/cache

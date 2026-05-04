@@ -30,7 +30,7 @@ For detailed documentation, please see the [docs/](docs/) folder:
 
 3. **Access the application**
    - URL: `http://localhost:8000`
-   - Default admin: `admin@example.com` / `password`
+   - Demo admin: `admin@demo.local` / `password`
 
 ## Key Features
 
@@ -45,12 +45,13 @@ For detailed documentation, please see the [docs/](docs/) folder:
 
 - **Backend**: Laravel 12, PHP 8.2+
 - **Frontend**: Livewire 3, Tailwind CSS, Alpine.js
-- **Database**: SQLite (dev) / MySQL/PostgreSQL (production)
+- **Database**: SQLite (dev) / MySQL (Docker production)
 - **Build**: Vite, Composer, NPM
+- **Container**: Docker (production only)
 
 ## Contributing
 
-See [docs/README.md](docs/README.md#contributing) for contribution guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
 ---
 
