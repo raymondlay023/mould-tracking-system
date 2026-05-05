@@ -1,4 +1,4 @@
-FROM php:8.3-fpm-alpine
+FROM php:8.2.12-fpm-alpine
 
 RUN apk add --no-cache \
     icu-dev \
@@ -30,9 +30,6 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
 RUN apk add --no-cache nodejs npm
 
 WORKDIR /var/www/html
-
-# Copy custom PHP configuration
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Copy app source
 COPY . .
