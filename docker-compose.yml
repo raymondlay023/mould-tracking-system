@@ -21,18 +21,18 @@ services:
     depends_on:
       - app
 
-   db:
-     image: mysql:8.0
-     container_name: mould_db
-     ports:
-       - "3307:3306"
-     environment:
-       MYSQL_DATABASE: mould_tracking
-       MYSQL_USER: mould_user
-       MYSQL_PASSWORD: mould_pass
-       MYSQL_ROOT_PASSWORD: root
-     volumes:
-       - dbdata:/var/lib/mysql
+  db:
+    image: mysql:8.0
+    container_name: mould_db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: mould_tracking
+      MYSQL_USER: mould_user
+      MYSQL_PASSWORD: mould_pass
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - dbdata:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
