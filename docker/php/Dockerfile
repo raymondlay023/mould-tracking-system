@@ -43,8 +43,8 @@ RUN composer install \
 # Install and build assets
 RUN npm install && npm run build && npm cache clean --force
 
-# Remove Node.js after build to reduce image size
-RUN apk del nodejs npm
+# Keep Node.js for potential asset rebuilds in production
+# RUN apk del nodejs npm
 
 # Laravel optimizations
 RUN php artisan config:clear \
@@ -52,4 +52,4 @@ RUN php artisan config:clear \
  && php artisan route:cache \
  && php artisan view:cache
 
-RUN chmod -R 755 storage bootstrap/cache
+RUN chmod -R 755 storage bootstrap/cache public
