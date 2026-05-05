@@ -26,6 +26,9 @@ RUN curl -sS https://getcomposer.org/installer | php -- \
     --install-dir=/usr/bin \
     --filename=composer
 
+# Node.js for asset building
+RUN apk add --no-cache nodejs npm
+
 WORKDIR /var/www/html
 
 # Copy app source
@@ -36,6 +39,12 @@ RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction
+
+# Install and build assets
+RUN npm install && npm run build && npm cache clean --force
+
+# Remove Node.js after build to reduce image size
+RUN apk del nodejs npm
 
 # Laravel optimizations
 RUN php artisan config:clear \

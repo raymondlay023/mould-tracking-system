@@ -28,6 +28,9 @@ tests/
 .DS_Store
 Thumbs.db
 
+# Kilo CLI configuration (development tool)
+.kilo/
+
 # Environment files (will be mounted or set via env vars)
 .env*
 !.env.example
