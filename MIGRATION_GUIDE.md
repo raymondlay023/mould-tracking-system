@@ -295,10 +295,20 @@ cp database/database.sqlite.backup database/database.sqlite
 
 ## Current System Configuration
 
+### Timezone Architecture (UTC-Only)
+
+**✅ CORRECTED**: All timestamps now stored in UTC with proper timezone information
+
+- **Database**: UTC timezone (server default)
+- **Application**: UTC timezone (Laravel config)
+- **Storage**: `timestampTz` columns for timezone-aware storage
+- **Display**: Converted to user timezone preference (Asia/Jakarta default)
+
 ### Local Development (SQLite)
 ```env
 DB_CONNECTION=sqlite
 # Database file: database/database.sqlite
+# Timezone: UTC (SQLite doesn't have server timezone)
 ```
 
 ### Docker Production (MySQL)
@@ -309,6 +319,7 @@ DB_PORT=3306
 DB_DATABASE=mould_tracking
 DB_USERNAME=mould_user
 DB_PASSWORD=mould_pass
+# Timezone: UTC (MySQL server default)
 ```
 
 ### Demo Users
@@ -318,6 +329,36 @@ After running `php artisan db:seed`, the following demo users are available:
 - **Maintenance**: `maint@demo.local` / `password`
 - **QA**: `qa@demo.local` / `password`
 - **Viewer**: `viewer@demo.local` / `password`
+
+## Timezone Migration (May 2026)
+
+### Background
+Previous system had inconsistent timezone handling:
+- Mixed `timestampTz` and `dateTime` columns
+- Database timezone set to `Asia/Jakarta`
+- Potential data integrity issues
+
+### Solution
+**Migration**: `2026_05_05_001303_convert_datetime_columns_to_timestamptz.php`
+
+**Changes:**
+- Converted all `dateTime`/`timestamp` columns to `timestampTz`
+- Removed `TZ: Asia/Jakarta` from Docker configuration
+- Standardized on UTC-only storage architecture
+
+**Affected Tables:**
+- `maintenance_events`: `start_ts`, `end_ts`
+- `setup_events`: `start_ts`, `end_ts`
+- `trial_events`: `start_ts`, `end_ts`, `approved_at`
+- `location_histories`: `start_ts`, `end_ts`
+- `moulds`: `rmp_last_at`, `last_pm_at_ts`
+- `notifications`: `read_at`
+
+**Benefits:**
+- ✅ Consistent UTC storage
+- ✅ Timezone-aware columns
+- ✅ Portable across environments
+- ✅ Standards-compliant architecture
 
 ---
 

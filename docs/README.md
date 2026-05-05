@@ -19,7 +19,7 @@ A comprehensive production management system for tracking injection moulds throu
 
 - **Backend**: Laravel 12 (PHP 8.3+)
 - **Frontend**: Livewire 3, Tailwind CSS 3, Alpine.js
-- **Database**: SQLite (local dev), MySQL (Docker production)
+- **Database**: MySQL (Docker production) with UTC timezone
 - **Authentication**: Laravel Breeze
 - **Permissions**: Spatie Laravel Permission (v6.25.0)
 - **Activity Log**: Spatie Laravel Activity Log (v4.12.3)
@@ -28,6 +28,7 @@ A comprehensive production management system for tracking injection moulds throu
 - **Build Tool**: Vite 7
 - **Testing**: PHPUnit 11
 - **Container**: Docker (production deployment only)
+- **Timezone**: UTC storage, user-preference display
 
 ## 📦 Installation
 
