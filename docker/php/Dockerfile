@@ -31,6 +31,9 @@ RUN apk add --no-cache nodejs npm
 
 WORKDIR /var/www/html
 
+# Copy custom PHP configuration
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+
 # Copy app source
 COPY . .
 

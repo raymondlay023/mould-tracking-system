@@ -8,6 +8,7 @@ docs/
 
 # Docker files (not needed in production)
 docker/
+!docker/php/
 docker-compose*.yml
 .dockerignore
 
