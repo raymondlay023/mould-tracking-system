@@ -50,6 +50,9 @@ RUN npm install && npm run build && npm cache clean --force
 RUN php artisan config:clear \
  && php artisan config:cache \
  && php artisan route:cache \
- && php artisan view:cache
+ && php artisan view:cache \
+ && php artisan storage:link
 
-RUN chmod -R 755 storage bootstrap/cache public
+RUN chown -R www-data:www-data storage bootstrap/cache \
+ && chmod -R 775 storage bootstrap/cache \
+ && chmod -R 755 public
