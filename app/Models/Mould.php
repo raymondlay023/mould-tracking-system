@@ -77,4 +77,9 @@ class Mould extends Model
             default => $eventName,
         };
     }
+
+    public function parts()
+    {
+        return $this->hasMany(Part::class, 'mould_id');
+    }
 }

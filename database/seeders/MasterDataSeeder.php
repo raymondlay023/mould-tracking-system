@@ -18,6 +18,7 @@ class MasterDataSeeder extends Seeder
         // Clean (safe for dev)
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
+        \App\Models\Part::truncate();
         Mould::truncate();
         Machine::truncate();
         Zone::truncate();
@@ -39,18 +40,16 @@ class MasterDataSeeder extends Seeder
         ]);
 
         /* ============================
-           ZONES / LINES
+           ZONES
         ============================ */
         $zones = [
             // Jakarta
-            ['plant_id' => $jakarta->id, 'code' => 'JZ1', 'name' => 'Injection Zone A'],
-            ['plant_id' => $jakarta->id, 'code' => 'JZ2', 'name' => 'Injection Zone B'],
-            ['plant_id' => $jakarta->id, 'code' => 'JZ3', 'name' => 'Assembly Zone'],
+            ['plant_id' => $jakarta->id, 'code' => 'JZA', 'name' => 'Injection Zone A'],
+            ['plant_id' => $jakarta->id, 'code' => 'JZB', 'name' => 'Injection Zone B'],
+            ['plant_id' => $jakarta->id, 'code' => 'JZC', 'name' => 'Injection Zone C'],
 
             // Karawang
-            ['plant_id' => $karawang->id, 'code' => 'KZ1', 'name' => 'Injection Line 1'],
-            ['plant_id' => $karawang->id, 'code' => 'KZ2', 'name' => 'Injection Line 2'],
-            ['plant_id' => $karawang->id, 'code' => 'KZ3', 'name' => 'Finishing Line'],
+            ['plant_id' => $karawang->id, 'code' => 'KZA', 'name' => 'Injection Zone A']
         ];
 
         $zoneMap = [];
@@ -63,34 +62,58 @@ class MasterDataSeeder extends Seeder
            MACHINES
         ============================ */
         $machines = [
-            // Jakarta
-            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZ1']->id, 'code' => 'MC-JKT-180T-01', 'name' => 'Injection 180T #1', 'tonnage_t' => 180, 'plc_connected' => true],
-            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZ1']->id, 'code' => 'MC-JKT-180T-02', 'name' => 'Injection 180T #2', 'tonnage_t' => 180, 'plc_connected' => false],
-            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZ2']->id, 'code' => 'MC-JKT-250T-01', 'name' => 'Injection 250T', 'tonnage_t' => 250, 'plc_connected' => true],
-
-            // Karawang
-            ['plant_id' => $karawang->id, 'zone_id' => $zoneMap['KZ1']->id, 'code' => 'MC-KRW-120T-01', 'name' => 'Injection 120T', 'tonnage_t' => 120, 'plc_connected' => false],
-            ['plant_id' => $karawang->id, 'zone_id' => $zoneMap['KZ2']->id, 'code' => 'MC-KRW-180T-01', 'name' => 'Injection 180T', 'tonnage_t' => 180, 'plc_connected' => true],
-            ['plant_id' => $karawang->id, 'zone_id' => $zoneMap['KZ2']->id, 'code' => 'MC-KRW-300T-01', 'name' => 'Injection 300T', 'tonnage_t' => 300, 'plc_connected' => false],
+            // Jakarta, zone A
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-350T-F', 'name' => 'Injection 350F', 'tonnage_t' => 350, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-450T-H', 'name' => 'Injection 450H', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-450T-I', 'name' => 'Injection 450I', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-450T-J', 'name' => 'Injection 450J', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-450T-G', 'name' => 'Injection 450G', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-550T-B', 'name' => 'Injection 550B', 'tonnage_t' => 550, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-650T-D', 'name' => 'Injection 650D', 'tonnage_t' => 650, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-650T-E', 'name' => 'Injection 650E', 'tonnage_t' => 650, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZA']->id, 'code' => 'MC-JKT-850T-D', 'name' => 'Injection 850D', 'tonnage_t' => 850, 'plc_connected' => false],
+            // Jakarta, zone B
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1300T-C', 'name' => 'Injection 1300C', 'tonnage_t' => 1300, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1050T-C', 'name' => 'Injection 1050C', 'tonnage_t' => 1050, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-850T-B', 'name' => 'Injection 850B', 'tonnage_t' => 850, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1300T-A', 'name' => 'Injection 1300A', 'tonnage_t' => 1300, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1050T-A', 'name' => 'Injection 1050A', 'tonnage_t' => 1050, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1050T-D', 'name' => 'Injection 1050D', 'tonnage_t' => 1050, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-650T-A', 'name' => 'Injection 650A', 'tonnage_t' => 650, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-850T-C', 'name' => 'Injection 850C', 'tonnage_t' => 850, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-650T-C', 'name' => 'Injection 650C', 'tonnage_t' => 650, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1050T-B', 'name' => 'Injection 1050B', 'tonnage_t' => 1050, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-700T-B', 'name' => 'Injection 700B', 'tonnage_t' => 700, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-700T-A', 'name' => 'Injection 700A', 'tonnage_t' => 700, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZB']->id, 'code' => 'MC-JKT-1300T-B', 'name' => 'Injection 1300B', 'tonnage_t' => 1300, 'plc_connected' => false],
+            // Jakarta, zone C
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-450T-C', 'name' => 'Injection 450C', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-150T-E', 'name' => 'Injection 150E', 'tonnage_t' => 150, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-150T-F', 'name' => 'Injection 150F', 'tonnage_t' => 150, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-360T-A', 'name' => 'Injection 360A', 'tonnage_t' => 360, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-360T-B', 'name' => 'Injection 360B', 'tonnage_t' => 360, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-360T-C', 'name' => 'Injection 360C', 'tonnage_t' => 360, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-360T-D', 'name' => 'Injection 360D', 'tonnage_t' => 360, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-450T-B', 'name' => 'Injection 450B', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-450T-A', 'name' => 'Injection 450A', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-350T-E', 'name' => 'Injection 350E', 'tonnage_t' => 350, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-450T-E', 'name' => 'Injection 450E', 'tonnage_t' => 450, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-150T-B', 'name' => 'Injection 150B', 'tonnage_t' => 150, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-150T-C', 'name' => 'Injection 150C', 'tonnage_t' => 150, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-150T-D', 'name' => 'Injection 150D', 'tonnage_t' => 150, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-50T-A', 'name' => 'Injection 50A', 'tonnage_t' => 50, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-110T-A', 'name' => 'Injection 110A', 'tonnage_t' => 110, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-50T-B', 'name' => 'Injection 50B', 'tonnage_t' => 50, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-240T-A', 'name' => 'Injection 240A', 'tonnage_t' => 240, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-300T-A', 'name' => 'Injection 300A', 'tonnage_t' => 300, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-300T-B', 'name' => 'Injection 300B', 'tonnage_t' => 300, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-170T-A', 'name' => 'Injection 170A', 'tonnage_t' => 170, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-170T-B', 'name' => 'Injection 170B', 'tonnage_t' => 170, 'plc_connected' => false],
+            ['plant_id' => $jakarta->id, 'zone_id' => $zoneMap['JZC']->id, 'code' => 'MC-JKT-150T-A', 'name' => 'Injection 150A', 'tonnage_t' => 150, 'plc_connected' => false],
         ];
 
         foreach ($machines as $m) {
             Machine::create(array_merge($m, ['id' => Str::uuid()]));
-        }
-
-        /* ============================
-           MOULDS (sample)
-        ============================ */
-        $moulds = [
-            ['code' => 'M-0001', 'name' => 'Cup 250ml', 'cavities' => 2, 'customer' => 'ABC', 'resin' => 'PP', 'min_tonnage_t' => 120, 'max_tonnage_t' => 180, 'pm_interval_shot' => 50000, 'pm_interval_days' => 30, 'commissioned_at' => '2024-01-15', 'status' => 'AVAILABLE'],
-            ['code' => 'M-0002', 'name' => 'Bottle Cap', 'cavities' => 4, 'customer' => 'XYZ', 'resin' => 'HDPE', 'min_tonnage_t' => 180, 'max_tonnage_t' => 250, 'pm_interval_shot' => 80000, 'pm_interval_days' => 45, 'commissioned_at' => '2023-11-10', 'status' => 'AVAILABLE'],
-            ['code' => 'M-0003', 'name' => 'Food Tray', 'cavities' => 1, 'customer' => 'FOODCO', 'resin' => 'PET', 'min_tonnage_t' => 250, 'max_tonnage_t' => 300, 'pm_interval_shot' => 30000, 'pm_interval_days' => 20, 'commissioned_at' => '2024-03-01', 'status' => 'AVAILABLE'],
-            ['code' => 'M-0004', 'name' => 'Plastic Spoon', 'cavities' => 8, 'customer' => 'ABC', 'resin' => 'PP', 'min_tonnage_t' => 120, 'max_tonnage_t' => 180, 'pm_interval_shot' => 100000, 'pm_interval_days' => 60, 'commissioned_at' => '2022-07-01', 'status' => 'AVAILABLE'],
-            ['code' => 'M-0005', 'name' => 'Container Lid', 'cavities' => 2, 'customer' => 'PACKCO', 'resin' => 'PP', 'min_tonnage_t' => 180, 'max_tonnage_t' => 250, 'pm_interval_shot' => 60000, 'pm_interval_days' => 40, 'commissioned_at' => '2023-05-10', 'status' => 'AVAILABLE'],
-        ];
-
-        foreach ($moulds as $m) {
-            Mould::create(array_merge($m, ['id' => Str::uuid()]));
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Mould;
+use App\Models\Part;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -26,16 +27,39 @@ class MouldsImport implements ToCollection, WithHeadingRow
             $rowNumber++;
 
             // Normalisasi key (heading)
+            // MOLD No. harus diisi — tidak ada fallback ke PART NO. agar tabel moulds
+            // tidak terkontaminasi dengan nomor part.
+            $mouldCode = trim((string) ($row['mold_no'] ?? $row['mould_no'] ?? $row['mold_no_'] ?? $row['code'] ?? ''));
+            $partNumber = trim((string) ($row['part_no'] ?? $row['part_number'] ?? $row['part_no_'] ?? ''));
+
+            $partName = trim((string) ($row['part_name'] ?? $row['name'] ?? ''));
+
+            // Parse tonnage dari MC NO (misal "1300T" -> 1300)
+            $minTonnage = null;
+            $mcNo = $row['mc_no'] ?? $row['mc_no_'] ?? $row['min_tonnage_t'] ?? null;
+            if ($mcNo !== null && $mcNo !== '') {
+                if (preg_match('/(\d+)/', (string) $mcNo, $matches)) {
+                    $minTonnage = (int) $matches[1];
+                }
+            }
+            $maxTonnage = isset($row['max_tonnage_t']) ? (int) $row['max_tonnage_t'] : $minTonnage;
+
+            // Ideal Cycle Time (CT)
+            $ctVal = $row['ct'] ?? $row['ideal_cycle_time'] ?? null;
+            $idealCycleTime = ($ctVal !== null && $ctVal !== '') ? (float) $ctVal : null;
+
             $data = [
-                'code' => trim((string) ($row['code'] ?? '')),
-                'name' => trim((string) ($row['name'] ?? '')),
-                'cavities' => $row['cavities'] ?? null,
-                'customer' => $row['customer'] ?? null,
-                'resin' => $row['resin'] ?? null,
-                'min_tonnage_t' => $row['min_tonnage_t'] ?? null,
-                'max_tonnage_t' => $row['max_tonnage_t'] ?? null,
+                'code' => $mouldCode,
+                'name' => $partName,
+                'part_number' => $partNumber,
+                'cavities' => $row['cav'] ?? $row['cavities'] ?? null,
+                'customer' => $row['cust2'] ?? $row['customer'] ?? $row['cust'] ?? null,
+                'resin' => $row['material'] ?? $row['resin'] ?? null,
+                'min_tonnage_t' => $minTonnage,
+                'max_tonnage_t' => $maxTonnage,
                 'pm_interval_shot' => $row['pm_interval_shot'] ?? null,
                 'pm_interval_days' => $row['pm_interval_days'] ?? null,
+                'ideal_cycle_time' => $idealCycleTime,
                 'commissioned_at' => $row['commissioned_at'] ?? null,
                 'status' => strtoupper(trim((string) ($row['status'] ?? 'AVAILABLE'))),
             ];
@@ -56,16 +80,32 @@ class MouldsImport implements ToCollection, WithHeadingRow
             // Upsert by code (lebih natural untuk import master)
             $existing = Mould::where('code', $data['code'])->first();
 
+            // Pisahkan part_number dari $data untuk update/create Mould
+            $mouldData = $data;
+            unset($mouldData['part_number']);
+
             if ($existing) {
                 if ($this->upsert) {
-                    $existing->update($data);
+                    $existing->update($mouldData);
                     $this->updated++;
                 }
             } else {
                 // UUID biasanya auto di model via HasUuids, tapi aman:
-                $data['id'] = (string) Str::uuid();
-                Mould::create($data);
+                $mouldData['id'] = (string) Str::uuid();
+                $existing = Mould::create($mouldData);
                 $this->inserted++;
+            }
+
+            // Create atau update Part yang berasosiasi
+            if ($partNumber !== '') {
+                Part::updateOrCreate(
+                    ['part_number' => $partNumber],
+                    [
+                        'mould_id' => $existing->id,
+                        'part_name' => $partName,
+                        'cavity_number' => $data['cavities'] !== null ? (int) $data['cavities'] : null,
+                    ]
+                );
             }
         }
     }
@@ -76,7 +116,7 @@ class MouldsImport implements ToCollection, WithHeadingRow
 
         // Required
         if ($data['code'] === '') {
-            $errors[] = 'code wajib diisi';
+            $errors[] = 'MOLD No. wajib diisi — lengkapi kolom MOLD No. pada file Excel sebelum import';
         }
         if ($data['name'] === '') {
             $errors[] = 'name wajib diisi';
