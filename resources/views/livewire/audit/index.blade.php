@@ -2,7 +2,7 @@
     <h1 class="text-xl font-semibold mb-4">Audit Log</h1>
 
     <div class="bg-white shadow-sm rounded p-4 mb-4 flex items-center gap-3">
-        <input type="text" wire:model.debounce.400ms="search" class="w-full rounded border-gray-300"
+        <input type="text" wire:model.live.debounce.400ms="search" class="w-full rounded border-gray-300"
             placeholder="Search description/log/subject...">
         <select wire:model="perPage" class="rounded border-gray-300">
             <option value="25">25</option>

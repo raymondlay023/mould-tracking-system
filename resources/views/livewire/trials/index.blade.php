@@ -90,7 +90,7 @@
 
         <div class="lg:col-span-2 bg-white shadow-sm rounded p-4">
             <div class="flex items-center gap-3 mb-3">
-                <input type="text" wire:model.debounce.400ms="search" class="w-full rounded border-gray-300"
+                <input type="text" wire:model.live.debounce.400ms="search" class="w-full rounded border-gray-300"
                     placeholder="Search mould/machine...">
                 <select wire:model="perPage" class="rounded border-gray-300">
                     <option value="10">10</option>

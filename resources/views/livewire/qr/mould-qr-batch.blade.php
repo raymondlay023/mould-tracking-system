@@ -7,7 +7,7 @@
     </div>
 
     <div class="bg-white shadow-sm rounded p-4 mb-4 flex items-center gap-3">
-        <input type="text" wire:model.debounce.400ms="search"
+        <input type="text" wire:model.live.debounce.400ms="search"
             class="w-full rounded border-gray-300"
             placeholder="Search code/name...">
         <select wire:model="perPage" class="rounded border-gray-300">
