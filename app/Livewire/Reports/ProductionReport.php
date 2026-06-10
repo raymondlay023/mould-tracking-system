@@ -120,10 +120,15 @@ class ProductionReport extends Component
 
         // ---- Top NG Reason (per group) ----
         $groupCol = $this->group_by === 'machine' ? 'pr.machine_id' : 'pr.mould_id';
+        // The actual column to join on in the outer query (not the alias)
+        $outerGroupCol = $this->group_by === 'machine' ? 'mc.id' : 'mo.id';
 
         // aggregate defects per group
+        // Use a single optional machines join (mc_f) for both plant and zone filters
+        $needsMachineJoin = $this->plant_id || $this->zone_id;
         $defAgg = DB::table('production_runs as pr')
             ->join('run_defects as rd', 'rd.run_id', '=', 'pr.id')
+            ->when($needsMachineJoin, fn ($qq) => $qq->join('machines as mc_f', 'pr.machine_id', '=', 'mc_f.id'))
             ->selectRaw("
                 {$groupCol} as group_id,
                 rd.defect_code,
@@ -132,16 +137,10 @@ class ProductionReport extends Component
             ->whereNotNull('pr.end_ts')
             ->whereDate('pr.end_ts', '>=', $this->date_from)
             ->whereDate('pr.end_ts', '<=', $this->date_to)
-            ->when($this->plant_id, function ($qq) {
-                $qq->join('machines as mc2', 'pr.machine_id', '=', 'mc2.id')
-                    ->where('mc2.plant_id', $this->plant_id);
-            })
-            ->when($this->zone_id, function ($qq) {
-                $qq->join('machines as mc3', 'pr.machine_id', '=', 'mc3.id')
-                    ->where('mc3.zone_id', $this->zone_id);
-            })
+            ->when($this->plant_id, fn ($qq) => $qq->where('mc_f.plant_id', $this->plant_id))
+            ->when($this->zone_id, fn ($qq) => $qq->where('mc_f.zone_id', $this->zone_id))
             ->when($this->machine_id, fn ($qq) => $qq->where('pr.machine_id', $this->machine_id))
-            ->groupBy('group_id', 'rd.defect_code');
+            ->groupBy($groupCol, 'rd.defect_code');
 
         // pick top 1 defect per group using ROW_NUMBER
         $topDef = DB::query()
@@ -153,24 +152,28 @@ class ProductionReport extends Component
                 ROW_NUMBER() OVER (PARTITION BY d.group_id ORDER BY d.qty_sum DESC) as rn
             ');
 
+        // Join using the real column, not the SELECT alias (aliases not valid in ON clause)
         $q->leftJoinSub(
             DB::query()->fromSub($topDef, 'td')->where('td.rn', 1),
             'topd',
-            fn ($j) => $j->on('topd.group_id', '=', 'group_id')
+            fn ($j) => $j->on('topd.group_id', '=', $outerGroupCol)
         );
 
         // include columns in select
-        $q->addSelect(DB::raw('topd.defect_code as top_defect_code'));
-        $q->addSelect(DB::raw('topd.qty_sum as top_defect_qty'));
+        // ANY_VALUE() satisfies only_full_group_by: topd has at most 1 row per
+        // group_id (rn = 1), so the value is deterministic even though MySQL
+        // cannot prove functional dependency.
+        $q->addSelect(DB::raw('ANY_VALUE(topd.defect_code) as top_defect_code'));
+        $q->addSelect(DB::raw('ANY_VALUE(topd.qty_sum) as top_defect_qty'));
 
-        // sorting
-        // note: ng_rate = ng / (ok+ng). MySQL: handle via expression
+        // sorting — must use full aggregate expressions, not aliases, because
+        // MySQL only_full_group_by resolves bare names back to raw columns.
         return match ($this->sort) {
-            'ng_desc' => $q->orderByDesc('ng_part'),
-            'ok_desc' => $q->orderByDesc('ok_part'),
-            'shot_desc' => $q->orderByDesc('shot_total'),
-            'cycle_desc' => $q->orderByDesc('avg_cycle_sec'),
-            default => $q->orderByRaw('(CASE WHEN (ok_part+ng_part)=0 THEN 0 ELSE (ng_part/(ok_part+ng_part)) END) DESC'),
+            'ng_desc'    => $q->orderByRaw('COALESCE(SUM(pr.ng_part),0) DESC'),
+            'ok_desc'    => $q->orderByRaw('COALESCE(SUM(pr.ok_part),0) DESC'),
+            'shot_desc'  => $q->orderByRaw('COALESCE(SUM(pr.shot_total),0) DESC'),
+            'cycle_desc' => $q->orderByRaw('AVG(pr.cycle_time_avg_sec) DESC'),
+            default      => $q->orderByRaw('(CASE WHEN (COALESCE(SUM(pr.ok_part),0)+COALESCE(SUM(pr.ng_part),0))=0 THEN 0 ELSE (COALESCE(SUM(pr.ng_part),0)/(COALESCE(SUM(pr.ok_part),0)+COALESCE(SUM(pr.ng_part),0))) END) DESC'),
         };
     }
 
