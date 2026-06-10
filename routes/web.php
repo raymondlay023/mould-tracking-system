@@ -10,6 +10,7 @@ use App\Livewire\Locations\Move;
 use App\Livewire\Machines\Index as MachineIndex;
 use App\Livewire\Maintenance\Index as MaintenanceIndex;
 use App\Livewire\Moulds\Index as MouldIndex;
+use App\Livewire\Parts\Index as PartIndex;
 use App\Livewire\Moulds\Show as MouldShow;
 use App\Livewire\Plants\Index as PlantIndex;
 use App\Livewire\Qr\MouldQrBatch;
@@ -116,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/plants', PlantIndex::class)->name('plants.index');
         Route::get('/zones', ZoneIndex::class)->name('zones.index');
         Route::get('/machines', MachineIndex::class)->name('machines.index');
+        Route::get('/parts', PartIndex::class)->name('parts.index');
         Route::view('/users', 'users.index')->name('users.index'); // Placeholder for now
     });
 
