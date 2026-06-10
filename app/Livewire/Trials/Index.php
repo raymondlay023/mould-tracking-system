@@ -5,6 +5,7 @@ namespace App\Livewire\Trials;
 use App\Models\TrialEvent;
 use App\Models\Mould;
 use App\Models\Machine;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Illuminate\Support\Facades\Gate;
@@ -56,11 +57,12 @@ class Index extends Component
     public function edit(string $id): void
     {
         $t = TrialEvent::findOrFail($id);
+        $tz = auth()->user()->timezone ?? 'UTC';
         $this->trialId = $t->id;
         $this->mould_id = $t->mould_id;
         $this->machine_id = $t->machine_id;
-        $this->start_ts = $t->start_ts?->format('Y-m-d\TH:i') ?? '';
-        $this->end_ts = $t->end_ts?->format('Y-m-d\TH:i') ?? '';
+        $this->start_ts = $t->start_ts?->setTimezone($tz)->format('Y-m-d\TH:i') ?? '';
+        $this->end_ts = $t->end_ts?->setTimezone($tz)->format('Y-m-d\TH:i') ?? '';
         $this->purpose = $t->purpose;
         $this->parameters = $t->parameters;
         $this->notes = $t->notes;
@@ -72,8 +74,11 @@ class Index extends Component
         // Security Check
         abort_if(Gate::denies('manage_trials'), 403, 'Unauthorized');
 
-
         $v = $this->validate();
+        $tz = auth()->user()->timezone ?? 'UTC';
+
+        $v['start_ts'] = Carbon::createFromFormat('Y-m-d\TH:i', $v['start_ts'], $tz)->utc();
+        $v['end_ts']   = Carbon::createFromFormat('Y-m-d\TH:i', $v['end_ts'],   $tz)->utc();
 
         TrialEvent::updateOrCreate(
             ['id' => $this->trialId],
@@ -137,11 +142,12 @@ class Index extends Component
 
     private function resetForm(): void
     {
+        $tz = auth()->user()->timezone ?? 'UTC';
         $this->trialId = null;
         $this->mould_id = '';
         $this->machine_id = '';
-        $this->start_ts = now()->subMinutes(30)->format('Y-m-d\TH:i');
-        $this->end_ts = now()->format('Y-m-d\TH:i');
+        $this->start_ts = now($tz)->subMinutes(30)->format('Y-m-d\TH:i');
+        $this->end_ts = now($tz)->format('Y-m-d\TH:i');
         $this->purpose = null;
         $this->parameters = null;
         $this->notes = null;

@@ -5,6 +5,7 @@ namespace App\Livewire\Setups;
 use App\Models\SetupEvent;
 use App\Models\Mould;
 use App\Models\Machine;
+use Carbon\Carbon;
 use Livewire\Component;
 use Illuminate\Support\Facades\Gate;
 use Livewire\WithPagination;
@@ -54,11 +55,12 @@ class Index extends Component
     public function edit(string $id): void
     {
         $s = SetupEvent::findOrFail($id);
+        $tz = auth()->user()->timezone ?? 'UTC';
         $this->setupId = $s->id;
         $this->mould_id = $s->mould_id;
         $this->machine_id = $s->machine_id;
-        $this->start_ts = $s->start_ts?->format('Y-m-d\TH:i') ?? '';
-        $this->end_ts = $s->end_ts?->format('Y-m-d\TH:i') ?? '';
+        $this->start_ts = $s->start_ts?->setTimezone($tz)->format('Y-m-d\TH:i') ?? '';
+        $this->end_ts   = $s->end_ts?->setTimezone($tz)->format('Y-m-d\TH:i') ?? '';
         $this->target_min = $s->target_min;
         $this->actual_min = $s->actual_min;
         $this->loss_reason = $s->loss_reason;
@@ -73,14 +75,14 @@ class Index extends Component
         abort_if(Gate::denies('manage_setups'), 403, 'Unauthorized');
 
         $v = $this->validate();
+        $tz = auth()->user()->timezone ?? 'UTC';
+
+        $v['start_ts'] = Carbon::createFromFormat('Y-m-d\TH:i', $v['start_ts'], $tz)->utc();
+        $v['end_ts']   = Carbon::createFromFormat('Y-m-d\TH:i', $v['end_ts'],   $tz)->utc();
 
         SetupEvent::updateOrCreate(
             ['id' => $this->setupId],
-            [
-                ...$v,
-                'start_ts' => $v['start_ts'],
-                'end_ts' => $v['end_ts'],
-            ]
+            $v
         );
 
         session()->flash('success', $this->setupId ? 'Setup updated.' : 'Setup created.');
@@ -99,11 +101,12 @@ class Index extends Component
 
     private function resetForm(): void
     {
+        $tz = auth()->user()->timezone ?? 'UTC';
         $this->setupId = null;
         $this->mould_id = '';
         $this->machine_id = '';
-        $this->start_ts = now()->subMinutes(30)->format('Y-m-d\TH:i');
-        $this->end_ts = now()->format('Y-m-d\TH:i');
+        $this->start_ts = now($tz)->subMinutes(30)->format('Y-m-d\TH:i');
+        $this->end_ts   = now($tz)->format('Y-m-d\TH:i');
         $this->target_min = null;
         $this->actual_min = null;
         $this->loss_reason = null;
