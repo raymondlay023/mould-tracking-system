@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
 use App\Livewire\Maintenance\Index;
 use App\Models\MaintenanceEvent;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class TimezoneTest extends TestCase
@@ -18,8 +20,8 @@ class TimezoneTest extends TestCase
     {
         // 1. Setup User in Jakarta (GMT+7)
         $user = User::factory()->create(['timezone' => 'Asia/Jakarta']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'create_maintenance_events']);
-        $user->givePermissionTo('create_maintenance_events');
+        Permission::create(['name' => PermissionEnum::CreateMaintenanceEvents->value]);
+        $user->givePermissionTo(PermissionEnum::CreateMaintenanceEvents->value);
         $mould = Mould::factory()->create();
 
         // 2. Input: "2023-01-01 10:00" (Jakarta Time)
@@ -31,7 +33,6 @@ class TimezoneTest extends TestCase
             ->set('type', 'PM')
             ->set('start_ts', '2023-01-01T10:00')
             ->set('end_ts', '2023-01-01T10:01') // 1 minute duration
-             ->set('is_completed', true)
             ->set('downtime_min', 0)
             ->call('save')
             ->assertHasNoErrors();
@@ -57,7 +58,8 @@ class TimezoneTest extends TestCase
 
         // 2. Setup User in Jakarta
         $user = User::factory()->create(['timezone' => 'Asia/Jakarta']);
-        $user->givePermissionTo(\Spatie\Permission\Models\Permission::create(['name' => 'create_maintenance_events']));
+        $user = User::factory()->create(['timezone' => 'Asia/Jakarta']);
+        $user->givePermissionTo(Permission::create(['name' => PermissionEnum::CreateMaintenanceEvents->value]));
 
         // 3. Mount Component
         // Expected Display: "2023-01-01 10:00" (Jakarta)

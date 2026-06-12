@@ -3,11 +3,12 @@
 namespace Tests\Feature;
 
 use App\Enums\MouldStatus;
+use App\Enums\Role;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class MouldManagementTest extends TestCase
@@ -21,11 +22,11 @@ class MouldManagementTest extends TestCase
         parent::setUp();
 
         // Create roles
-        Role::create(['name' => 'Admin']);
+        SpatieRole::create(['name' => Role::Admin->value]);
 
         // Create and authenticate an admin user
         $this->user = User::factory()->create();
-        $this->user->assignRole('Admin');
+        $this->user->assignRole(Role::Admin->value);
         $this->actingAs($this->user);
     }
 

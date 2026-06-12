@@ -1,13 +1,5 @@
-<div class="space-y-4" x-data="{
-    scanning: true,
-    result: null,
-    errorMessage: null,
-    initScanner() {
-        // We'll use a dynamic script load or assume it's loaded in layout if we decide to add it there.
-        // For now, let's assume we add it to the view or layout.
-        // This is a placeholder for the actual JS logic we will implement next.
-    }
-}">
+<div>
+    <div class="space-y-4" x-data="{ scanning: true, result: null, errorMessage: null }">
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <h1 class="text-xl font-bold text-gray-900 mb-2">Scan QR Code</h1>
         <p class="text-xs text-gray-500 mb-4">Point your camera at a Mould or Machine QR code.</p>
@@ -29,43 +21,36 @@
             </div>
         </div>
     </div>
-</div>
 
-@assets
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-@endassets
+    @assets
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    @endassets
 
-@script
-<script>
-    Livewire.hook('morph.added', ({ el }) => {
-        // Re-init if needed
+    @script
+    <script>
+    document.addEventListener('livewire:initialized', function () {
+        Livewire.hook('morph.added', function (params) {
+            // Re-init if needed
+        });
+
+        const onScanSuccess = function (decodedText, decodedResult) {
+            console.log('Code matched', decodedText);
+            html5QrcodeScanner.clear();
+            $wire.handleScan(decodedText);
+        };
+
+        const onScanFailure = function (error) {
+        };
+
+        if (document.getElementById('reader')) {
+             const html5QrcodeScanner = new Html5QrcodeScanner(
+                'reader',
+                { fps: 10, qrbox: {width: 250, height: 250} },
+                false
+            );
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
     });
-
-    const onScanSuccess = (decodedText, decodedResult) => {
-        console.log(`Code matched = ${decodedText}`, decodedResult);
-        // Stop scanning
-        html5QrcodeScanner.clear();
-        // Send to Livewire
-        @this.handleScan(decodedText);
-    };
-
-    const onScanFailure = (error) => {
-        // handle scan failure, usually better to ignore and keep scanning.
-        // console.warn(`Code scan error = ${error}`);
-    };
-
-    // Initialize HTML5 QR Code Scanner
-    // We use Html5QrcodeScanner for ease, or Html5Qrcode for custom UI.
-    // Let's use the 'reader' div.
-    
-    // Wait for library to load? @assets puts it in head, so it should be ready.
-    if (document.getElementById('reader')) {
-         const html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader",
-            { fps: 10, qrbox: {width: 250, height: 250} },
-            /* verbose= */ false
-        );
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-    }
-</script>
-@endscript
+    </script>
+    @endscript
+</div>

@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
 use App\Livewire\Maintenance\Index;
 use App\Models\MaintenanceEvent;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class MaintenanceFormTest extends TestCase
@@ -17,8 +19,8 @@ class MaintenanceFormTest extends TestCase
     public function test_can_create_completed_maintenance_log()
     {
         $user = User::factory()->create();
-        \Spatie\Permission\Models\Permission::create(['name' => 'create_maintenance_events']);
-        $user->givePermissionTo('create_maintenance_events');
+        Permission::create(['name' => PermissionEnum::CreateMaintenanceEvents->value]);
+        $user->givePermissionTo(PermissionEnum::CreateMaintenanceEvents->value);
         $mould = Mould::factory()->create();
 
         Livewire::actingAs($user)
@@ -45,8 +47,8 @@ class MaintenanceFormTest extends TestCase
     public function test_validation_always_requires_completion_fields()
     {
         $user = User::factory()->create();
-        \Spatie\Permission\Models\Permission::create(['name' => 'create_maintenance_events']);
-        $user->givePermissionTo('create_maintenance_events');
+        Permission::create(['name' => PermissionEnum::CreateMaintenanceEvents->value]);
+        $user->givePermissionTo(PermissionEnum::CreateMaintenanceEvents->value);
         $mould = Mould::factory()->create();
         
         Livewire::actingAs($user)

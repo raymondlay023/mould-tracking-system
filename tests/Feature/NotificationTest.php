@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
 use App\Livewire\Maintenance\WorkOrders;
 use App\Livewire\Partials\NotificationBell;
 use App\Models\Mould;
@@ -9,6 +10,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class NotificationTest extends TestCase
@@ -23,18 +25,18 @@ class NotificationTest extends TestCase
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         
         $recipient = User::factory()->create();
-        \Spatie\Permission\Models\Permission::create(['name' => 'view_maintenance_section']);
-        $recipient->givePermissionTo('view_maintenance_section');
+        Permission::create(['name' => PermissionEnum::ViewMaintenanceSection->value]);
+        $recipient->givePermissionTo(PermissionEnum::ViewMaintenanceSection->value);
 
         // DEBUG: Ensure scope works
-        if (!User::permission('view_maintenance_section')->exists()) {
+        if (!User::permission(PermissionEnum::ViewMaintenanceSection->value)->exists()) {
             $this->fail('Permission scope failed to find user.');
         }
 
         // 2. Create Sender (Operator)
         $sender = User::factory()->create();
-        \Spatie\Permission\Models\Permission::create(['name' => 'create_maintenance_events']);
-        $sender->givePermissionTo('create_maintenance_events');
+        Permission::create(['name' => PermissionEnum::CreateMaintenanceEvents->value]);
+        $sender->givePermissionTo(PermissionEnum::CreateMaintenanceEvents->value);
         
         $mould = Mould::factory()->create();
 

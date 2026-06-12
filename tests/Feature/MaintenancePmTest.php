@@ -13,6 +13,13 @@ class MaintenancePmTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
+    }
+
     /** @test */
     public function test_action_identifies_overdue_moulds()
     {

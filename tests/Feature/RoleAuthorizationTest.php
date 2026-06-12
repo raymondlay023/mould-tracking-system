@@ -2,12 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\User;
 use App\Models\Mould;
 use App\Models\ProductionRun;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class RoleAuthorizationTest extends TestCase
@@ -18,25 +19,25 @@ class RoleAuthorizationTest extends TestCase
     {
         parent::setUp();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
     }
 
     public function test_viewer_cannot_close_run()
     {
         $user = User::factory()->create();
-        $user->assignRole('Viewer');
+        $user->assignRole(Role::Viewer->value);
         $user->refresh();
         
         $run = ProductionRun::factory()->create(['end_ts' => null]);
 
         // Debug assertions
-        if (!$user->hasRole('Viewer')) {
+        if (!$user->hasRole(Role::Viewer->value)) {
              throw new \Exception('User failed to get Viewer role');
         }
 
         Livewire::actingAs($user)
             ->test(\App\Livewire\Runs\Close::class, ['run' => $run])
-            ->call('closeRun')
+            ->call('save')
             ->assertStatus(403);
     }
 }

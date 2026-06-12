@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Activity;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class AuditTest extends TestCase
@@ -43,8 +45,8 @@ class AuditTest extends TestCase
     public function test_audit_index_page_loads()
     {
         $admin = User::factory()->create();
-        \Spatie\Permission\Models\Permission::create(['name' => 'view_admin_panel']);
-        $admin->givePermissionTo('view_admin_panel');
+        Permission::create(['name' => PermissionEnum::ViewAdminPanel->value]);
+        $admin->givePermissionTo(PermissionEnum::ViewAdminPanel->value);
 
         $this->actingAs($admin)
             ->get(route('audit.index'))

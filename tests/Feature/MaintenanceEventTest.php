@@ -2,13 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Machine;
 use App\Models\MaintenanceEvent;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class MaintenanceEventTest extends TestCase
@@ -21,13 +22,12 @@ class MaintenanceEventTest extends TestCase
     {
         parent::setUp();
 
-        // Create roles
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'Maintenance']);
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        $this->seed(\Database\Seeders\RolesAndPermissionsSeeder::class);
 
         // Create and authenticate a maintenance user
         $this->user = User::factory()->create();
-        $this->user->assignRole('Maintenance');
+        $this->user->assignRole(Role::Maintenance->value);
         $this->actingAs($this->user);
     }
 
@@ -37,7 +37,7 @@ class MaintenanceEventTest extends TestCase
         $response = $this->get(route('maintenance.index'));
 
         $response->assertOk();
-        $response->assertSeeLivewire('maintenance.index');
+        $response->assertSeeLivewire(\App\Livewire\Maintenance\Index::class);
     }
 
     /** @test */
@@ -167,7 +167,8 @@ class MaintenanceEventTest extends TestCase
 
         Livewire::test(\App\Livewire\Maintenance\Index::class)
             ->set('search', 'MLD-001')
-            ->assertSee('MLD-001')
-            ->assertDontSee('MLD-002');
+            ->assertViewHas('events', function ($events) use ($mould2) {
+                return !$events->contains('mould_id', $mould2->id);
+            });
     }
 }

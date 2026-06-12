@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
 use App\Livewire\Maintenance\WorkOrders;
 use App\Models\MaintenanceEvent;
 use App\Models\Mould;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class WorkOrdersTest extends TestCase
@@ -17,8 +19,9 @@ class WorkOrdersTest extends TestCase
     public function test_can_create_work_order_request()
     {
         $user = User::factory()->create(['timezone' => 'Asia/Jakarta']);
-        \Spatie\Permission\Models\Permission::create(['name' => 'create_maintenance_events']);
-        $user->givePermissionTo('create_maintenance_events');
+        Permission::create(['name' => PermissionEnum::CreateMaintenanceEvents->value]);
+        Permission::create(['name' => PermissionEnum::ViewMaintenanceSection->value]);
+        $user->givePermissionTo(PermissionEnum::CreateMaintenanceEvents->value);
         $mould = Mould::factory()->create();
 
         // Simulate User Input: "2023-01-01 10:00" (Jakarta)

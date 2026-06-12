@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+
 namespace Database\Seeders;
+
+use App\Enums\Role;
 
 use App\Models\LocationHistory;
 use App\Models\Machine;
@@ -45,11 +48,11 @@ class DemoDataSeeder extends Seeder
 
         // ===== 1) Users
         if (User::count() === 0) {
-            $this->makeUser('Admin Demo', 'admin@demo.local', 'Admin');
-            $this->makeUser('Prod Demo', 'prod@demo.local', 'Production');
-            $this->makeUser('Maint Demo', 'maint@demo.local', 'Maintenance');
-            $this->makeUser('QA Demo', 'qa@demo.local', 'QA');
-            $this->makeUser('Viewer Demo', 'viewer@demo.local', 'Viewer');
+            $this->makeUser('Admin Demo', 'admin@demo.local', Role::Admin->value);
+            $this->makeUser('Prod Demo', 'prod@demo.local', Role::Production->value);
+            $this->makeUser('Maint Demo', 'maint@demo.local', Role::Maintenance->value);
+            $this->makeUser('QA Demo', 'qa@demo.local', Role::QA->value);
+            $this->makeUser('Viewer Demo', 'viewer@demo.local', Role::Viewer->value);
         }
 
         // ===== Call other seeders

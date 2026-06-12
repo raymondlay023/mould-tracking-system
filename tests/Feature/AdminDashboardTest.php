@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class AdminDashboardTest extends TestCase
@@ -17,13 +18,13 @@ class AdminDashboardTest extends TestCase
         parent::setUp();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         
-        Role::create(['name' => 'Admin']);
+        SpatieRole::create(['name' => Role::Admin->value]);
     }
 
     public function test_admin_can_access_dashboard()
     {
         $user = User::factory()->create();
-        $user->assignRole('Admin');
+        $user->assignRole(Role::Admin->value);
         $user->refresh();
 
         $response = $this->actingAs($user)->get(route('admin.index'));
@@ -33,7 +34,7 @@ class AdminDashboardTest extends TestCase
     public function test_dashboard_component_renders()
     {
         $user = User::factory()->create();
-        $user->assignRole('Admin');
+        $user->assignRole(Role::Admin->value);
         $user->refresh();
 
         Livewire::actingAs($user)

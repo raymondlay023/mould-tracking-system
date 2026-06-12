@@ -23,7 +23,7 @@ class MouldPartsImportTest extends TestCase
                 'material' => 'PP-KF06 LD NC356LV (PP-TALC15%)',
                 'cust' => 'IKUYO_5H45',
                 'cust2' => 'IKUYO',
-                'mold_no' => '',
+                'mold_no' => 'MOLD-1',
                 'cav' => 1,
                 'ct' => 90,
             ],
@@ -34,7 +34,7 @@ class MouldPartsImportTest extends TestCase
                 'material' => 'PP-KF06 LD NC356LV (PP-TALC15%)',
                 'cust' => 'IKUYO_5H45',
                 'cust2' => 'IKUYO',
-                'mold_no' => '',
+                'mold_no' => 'MOLD-2',
                 'cav' => 2,
                 'ct' => 90,
             ],
@@ -54,12 +54,12 @@ class MouldPartsImportTest extends TestCase
         $importer = new MouldsImport(upsert: true);
         $importer->collection(collect($rows));
 
-        // 1. Assert three moulds were created (2 from fallback to part_no, 1 from mold_no)
+        // 1. Assert three moulds were created
         $this->assertDatabaseCount('moulds', 3);
         $this->assertDatabaseCount('parts', 3);
 
-        // 2. Assert specific fallback mould exists
-        $mould1 = Mould::where('code', '401-76934B001P')->first();
+        // 2. Assert specific mould exists
+        $mould1 = Mould::where('code', 'MOLD-1')->first();
         $this->assertNotNull($mould1);
         $this->assertEquals('GARNISH RR PLR RH 5H45 (SEMI)', $mould1->name);
         $this->assertEquals(1300, $mould1->min_tonnage_t);

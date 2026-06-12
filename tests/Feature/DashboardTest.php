@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Role;
 use App\Models\Machine;
 use App\Models\MaintenanceEvent;
 use App\Models\Mould;
@@ -9,7 +10,7 @@ use App\Models\ProductionRun;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -23,12 +24,12 @@ class DashboardTest extends TestCase
         parent::setUp();
 
         // Create roles
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'Viewer']);
+        SpatieRole::create(['name' => Role::Admin->value]);
+        SpatieRole::create(['name' => Role::Viewer->value]);
 
         // Create and authenticate a viewer user
         $this->user = User::factory()->create();
-        $this->user->assignRole('Viewer');
+        $this->user->assignRole(Role::Viewer->value);
         $this->actingAs($this->user);
     }
 
@@ -42,7 +43,9 @@ class DashboardTest extends TestCase
         Livewire::test(\App\Livewire\Dashboard\Summary::class)
             ->assertSee($activeRun1->mould->code)
             ->assertSee($activeRun2->mould->code)
-            ->assertDontSee($closedRun->mould->code);
+            ->assertViewHas('activeRunIds', function ($ids) use ($closedRun) {
+                return !$ids->contains($closedRun->id);
+            });
     }
 
     /** @test */
@@ -126,10 +129,9 @@ class DashboardTest extends TestCase
             'ng_part' => 50,
         ]);
 
-        $response = Livewire::test(\App\Livewire\Dashboard\Summary::class)
-            ->call('exportTopNg');
-
-        $this->assertTrue($response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse);
+        Livewire::test(\App\Livewire\Dashboard\Summary::class)
+            ->call('exportTopNg')
+            ->assertFileDownloaded('top_ng_since_' . now()->subDays(7)->toDateString() . '.xlsx');
     }
 
     /** @test */
@@ -140,9 +142,8 @@ class DashboardTest extends TestCase
             'mould_id' => $mould->id,
         ]);
 
-        $response = Livewire::test(\App\Livewire\Dashboard\Summary::class)
-            ->call('exportTopCm');
-
-        $this->assertTrue($response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse);
+        Livewire::test(\App\Livewire\Dashboard\Summary::class)
+            ->call('exportTopCm')
+            ->assertFileDownloaded('top_cm_since_' . now()->subDays(30)->toDateString() . '.xlsx');
     }
 }

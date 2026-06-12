@@ -2,7 +2,11 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Permission as PermissionEnum;
+use App\Enums\Role as RoleEnum;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -16,69 +20,78 @@ class RolesAndPermissionsSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $permissionsByRole = [
-            'Admin' => [
-                'view_admin_panel',
-                'manage_users',
-                'manage_plants',
-                'manage_zones',
-                'manage_machines',
-                'import_data',
-                'view_audit_logs',
-                'delete_moulds',
+            RoleEnum::Admin->value => [
+                PermissionEnum::ViewAdminPanel->value,
+                PermissionEnum::ManageUsers->value,
+                PermissionEnum::ManagePlants->value,
+                PermissionEnum::ManageZones->value,
+                PermissionEnum::ManageMachines->value,
+                PermissionEnum::ImportData->value,
+                PermissionEnum::ViewAuditLogs->value,
+                PermissionEnum::DeleteMoulds->value,
             ],
-            'Production' => [
-                'view_main_dashboard',
-                'view_production_section',
-                'access_operations',
-                'manage_trials',
-                'manage_setups',
-                'close_runs',
-                'manage_moulds',
-                'create_maintenance_events',
-                'move_locations',
+            RoleEnum::Production->value => [
+                PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::ViewProductionSection->value,
+                PermissionEnum::AccessOperations->value,
+                PermissionEnum::ManageTrials->value,
+                PermissionEnum::ManageSetups->value,
+                PermissionEnum::CloseRuns->value,
+                PermissionEnum::ManageMoulds->value,
+                PermissionEnum::CreateMaintenanceEvents->value,
+                PermissionEnum::MoveLocations->value,
             ],
-            'Maintenance' => [
-                'view_main_dashboard',
-                'view_maintenance_section',
-                'access_operations',
-                'manage_setups',
-                'close_runs',
-                'manage_moulds',
-                'create_maintenance_events',
-                'delete_maintenance_events',
-                'move_locations',
+            RoleEnum::Maintenance->value => [
+                PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::ViewMaintenanceSection->value,
+                PermissionEnum::AccessOperations->value,
+                PermissionEnum::ManageSetups->value,
+                PermissionEnum::CloseRuns->value,
+                PermissionEnum::ManageMoulds->value,
+                PermissionEnum::CreateMaintenanceEvents->value,
+                PermissionEnum::DeleteMaintenanceEvents->value,
+                PermissionEnum::MoveLocations->value,
             ],
-            'QA' => [
-                'view_main_dashboard',
-                'view_qa_section',
-                'access_operations',
-                'manage_trials',
-                'verify_trials',
+            RoleEnum::QA->value => [
+                PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::ViewQaSection->value,
+                PermissionEnum::AccessOperations->value,
+                PermissionEnum::ManageTrials->value,
+                PermissionEnum::VerifyTrials->value,
             ],
-            'Viewer' => [
-                'view_main_dashboard',
-                'access_operations', // Assuming viewer can view moulds etc.
+            RoleEnum::Viewer->value => [
+                PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::AccessOperations->value,
             ],
-            'Supervisor' => [
-                'view_main_dashboard',
-                'access_operations',
+            RoleEnum::Supervisor->value => [
+                PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::AccessOperations->value,
             ],
-            'Manager' => [
-                'view_main_dashboard',
-                'access_operations',
+            RoleEnum::Manager->value => [
+                PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::AccessOperations->value,
             ],
         ];
 
-        foreach ($permissionsByRole as $roleName => $permissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
+        DB::transaction(function () use ($permissionsByRole) {
+            // Bulk-create all unique permissions first (eliminates N+1)
+            collect($permissionsByRole)
+                ->flatten()
+                ->unique()
+                ->each(fn (string $name) => Permission::firstOrCreate([
+                    'name'       => $name,
+                    'guard_name' => 'web',
+                ]));
 
-            foreach ($permissions as $permissionName) {
-                // Create permission if it doesn't exist
-                $permission = \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permissionName]);
-                
-                // Assign permission to role
-                $role->givePermissionTo($permission);
+            // Create each role and sync its permissions (single query per role)
+            foreach ($permissionsByRole as $roleName => $permissions) {
+                $role = Role::firstOrCreate([
+                    'name'       => $roleName,
+                    'guard_name' => 'web',
+                ]);
+
+                $role->syncPermissions($permissions);
             }
-        }
+        });
     }
 }

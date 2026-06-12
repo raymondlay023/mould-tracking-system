@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
+use App\Enums\Role;
 use App\Models\Machine;
 use App\Models\Mould;
 use App\Models\ProductionRun;
@@ -9,7 +11,8 @@ use App\Models\RunDefect;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class ProductionRunTest extends TestCase
@@ -23,23 +26,23 @@ class ProductionRunTest extends TestCase
         parent::setUp();
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
         // Create roles
-        Role::create(['name' => 'Admin']);
-        $prod = Role::create(['name' => 'Production']);
+        SpatieRole::create(['name' => Role::Admin->value]);
+        $prod = SpatieRole::create(['name' => Role::Production->value]);
         
         // Permissions needed for tests
         $perms = [
-            'close_runs', 
-            'access_operations',
-            'view_production_section',
-            'manage_trials',
-            'manage_setups',
-            'manage_moulds',
-            'create_maintenance_events',
-            'move_locations'
+            PermissionEnum::CloseRuns->value,
+            PermissionEnum::AccessOperations->value,
+            PermissionEnum::ViewProductionSection->value,
+            PermissionEnum::ManageTrials->value,
+            PermissionEnum::ManageSetups->value,
+            PermissionEnum::ManageMoulds->value,
+            PermissionEnum::CreateMaintenanceEvents->value,
+            PermissionEnum::MoveLocations->value,
         ];
         
         foreach ($perms as $p) {
-             \Spatie\Permission\Models\Permission::create(['name' => $p]);
+             Permission::create(['name' => $p]);
              $prod->givePermissionTo($p);
         }
     }
@@ -47,7 +50,7 @@ class ProductionRunTest extends TestCase
     protected function getProductionUser(): User
     {
         $user = User::factory()->create();
-        $user->assignRole('Production');
+        $user->assignRole(Role::Production->value);
         $user->refresh();
         return $user; 
     }
@@ -215,7 +218,7 @@ class ProductionRunTest extends TestCase
             ->assertHasNoErrors();
 
         $mould->refresh();
-        $this->assertEquals('AVAILABLE', $mould->status);
+        $this->assertEquals('AVAILABLE', $mould->status->value);
     }
 
     /** @test */

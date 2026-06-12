@@ -2,10 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Enums\Permission as PermissionEnum;
 use App\Models\Mould;
 use App\Models\ProductionRun;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
 
 class ProductionDashboardTest extends TestCase
@@ -16,8 +18,8 @@ class ProductionDashboardTest extends TestCase
     {
         // 1. Setup User & Permissions
         $user = User::factory()->create();
-        \Spatie\Permission\Models\Permission::create(['name' => 'view_production_section']);
-        $user->givePermissionTo('view_production_section');
+        Permission::create(['name' => PermissionEnum::ViewProductionSection->value]);
+        $user->givePermissionTo(PermissionEnum::ViewProductionSection->value);
 
         // 2. Setup Data
         $mould = Mould::factory()->create([
