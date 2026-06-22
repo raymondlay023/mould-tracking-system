@@ -66,7 +66,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', \App\Livewire\Mobile\Dashboard::class)->name('dashboard');
         Route::get('/scan', \App\Livewire\Mobile\Scanner::class)->name('scanner');
         Route::get('/moulds/{mould}', \App\Livewire\Mobile\MouldDetail::class)->name('mould-detail');
+        Route::get('/moulds/{mould}/start-run', \App\Livewire\Mobile\StartRun::class)->name('runs.start');
+        Route::get('/moulds/{mould}/move', \App\Livewire\Mobile\MoveMould::class)->name('moulds.move');
         Route::get('/jobs', \App\Livewire\Mobile\Jobs::class)->name('jobs');
+        Route::get('/runs/{run}/end', \App\Livewire\Mobile\EndRun::class)->name('runs.end');
     });
 
     /**

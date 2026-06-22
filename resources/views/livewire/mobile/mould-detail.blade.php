@@ -1,4 +1,10 @@
 <div class="space-y-6">
+    @if(session()->has('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg text-sm relative" role="alert">
+            <span class="block sm:inline">{{ session('success') }}</span>
+        </div>
+    @endif
+
     {{-- Header --}}
     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div class="flex justify-between items-start">
@@ -25,23 +31,37 @@
                     Machine: <strong>{{ $activeRun->machine->code }}</strong><br>
                     Started: {{ $activeRun->start_ts->format('H:i') }}
                 </p>
-                <a href="#" class="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-bold shadow-sm">
-                    View Run
+                @can('close_runs')
+                <a wire:navigate href="{{ route('mobile.runs.end', ['run' => $activeRun->id]) }}" class="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-bold shadow-sm active:scale-95 transition-transform">
+                    End Production Run
                 </a>
+                @endcan
             </div>
         @else
+             @can('close_runs')
              {{-- Start Run Button --}}
-             <button class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-md flex items-center justify-center gap-2 active:scale-95 transition-transform">
+             <a wire:navigate href="{{ route('mobile.runs.start', ['mould' => $mould->id]) }}" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold shadow-md flex items-center justify-center gap-2 active:scale-95 transition-transform">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 Start Production Run
-            </button>
+            </a>
+            @endcan
         @endif
 
+        @can('move_locations')
         {{-- Move Button --}}
-        <button class="w-full bg-white border border-gray-200 text-gray-700 py-4 rounded-xl font-bold shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform">
+        <a wire:navigate href="{{ route('mobile.moulds.move', ['mould' => $mould->id]) }}" class="w-full bg-white border border-gray-200 text-gray-700 py-4 rounded-xl font-bold shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform">
              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
             Update Location
+        </a>
+        @endcan
+
+        @can('create_maintenance_events')
+        {{-- Maintenance Button --}}
+        <button wire:click="openMaintenanceModal" class="w-full bg-orange-600 text-white py-4 rounded-xl font-bold shadow-md flex items-center justify-center gap-2 active:scale-95 transition-transform">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            Log Maintenance
         </button>
+        @endcan
     </div>
 
     {{-- Stats --}}
@@ -57,4 +77,37 @@
             </div>
         </div>
     </div>
+
+    {{-- Maintenance Modal --}}
+    @if($showMaintenanceModal)
+    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-900">Log Maintenance</h3>
+                <button wire:click="$set('showMaintenanceModal', false)" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                    <select wire:model="maintenanceType" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="CM">Corrective (CM)</option>
+                        <option value="PM">Preventive (PM)</option>
+                    </select>
+                    @error('maintenanceType') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea wire:model="maintenanceDescription" rows="3" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Describe the issue or work needed..."></textarea>
+                    @error('maintenanceDescription') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 flex gap-2">
+                <button wire:click="$set('showMaintenanceModal', false)" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm">Cancel</button>
+                <button wire:click="submitMaintenance" class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm">Submit</button>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
