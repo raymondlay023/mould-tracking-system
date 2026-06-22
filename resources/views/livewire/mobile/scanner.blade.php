@@ -23,50 +23,50 @@
     </div>
 
     @assets
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+        <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     @endassets
 
     @script
-    <script>
-    document.addEventListener('livewire:initialized', function () {
-        let html5QrCode;
+        <script>
+            document.addEventListener('livewire:initialized', function () {
+                let html5QrCode;
 
-        const startCamera = () => {
-            if (html5QrCode) {
-                html5QrCode.stop().catch(e => console.log(e));
-            }
-            html5QrCode = new Html5Qrcode("reader");
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText, decodedResult) => {
-                    console.log('Code matched', decodedText);
-                    html5QrCode.stop().then(() => {
-                        $wire.handleScan(decodedText);
-                    }).catch(err => {
-                        $wire.handleScan(decodedText);
+                const startCamera = () => {
+                    if (html5QrCode) {
+                        html5QrCode.stop().catch(e => console.log(e));
+                    }
+                    html5QrCode = new Html5Qrcode("reader");
+                    html5QrCode.start(
+                        { facingMode: "environment" }, 
+                        { fps: 10, qrbox: { width: 250, height: 250 } },
+                        (decodedText, decodedResult) => {
+                            console.log('Code matched', decodedText);
+                            html5QrCode.stop().then(() => {
+                                $wire.handleScan(decodedText);
+                            }).catch(err => {
+                                $wire.handleScan(decodedText);
+                            });
+                        },
+                        (errorMessage) => {
+                            // ignore parse errors
+                        }
+                    ).then(() => {
+                        const loadingEl = document.getElementById('camera-loading');
+                        if(loadingEl) loadingEl.style.display = 'none';
+                    }).catch((err) => {
+                        console.warn("Camera start error:", err);
+                        const loadingEl = document.getElementById('camera-loading');
+                        if(loadingEl) {
+                            loadingEl.style.pointerEvents = 'auto';
+                            loadingEl.innerHTML = '<div class="text-center p-4"><p class="mb-2">Camera access denied.</p><button onclick="window.location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Retry</button></div>';
+                        }
                     });
-                },
-                (errorMessage) => {
-                    // ignore parse errors
-                }
-            ).then(() => {
-                const loadingEl = document.getElementById('camera-loading');
-                if(loadingEl) loadingEl.style.display = 'none';
-            }).catch((err) => {
-                console.warn("Camera start error:", err);
-                const loadingEl = document.getElementById('camera-loading');
-                if(loadingEl) {
-                    loadingEl.style.pointerEvents = 'auto';
-                    loadingEl.innerHTML = '<div class="text-center p-4"><p class="mb-2">Camera access denied.</p><button onclick="window.location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Retry</button></div>';
+                };
+
+                if (document.getElementById('reader')) {
+                    startCamera();
                 }
             });
-        };
-
-        if (document.getElementById('reader')) {
-            startCamera();
-        }
-    });
-    </script>
+        </script>
     @endscript
 </div>
