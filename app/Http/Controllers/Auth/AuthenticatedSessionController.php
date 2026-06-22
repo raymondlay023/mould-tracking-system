@@ -28,6 +28,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = $request->user();
+        $userAgent = $request->header('User-Agent');
+        $isMobile = preg_match('/Mobile|Android|iP(hone|od|ad)|IEMobile|BlackBerry/', $userAgent);
+
+        // Redirect to mobile app if on a mobile device and not an Admin/Manager
+        if ($isMobile && !$user->hasRole([\App\Enums\Role::Admin->value, \App\Enums\Role::Manager->value])) {
+            return redirect()->intended(route('mobile.dashboard', absolute: false));
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 
