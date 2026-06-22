@@ -20,16 +20,7 @@ class RolesAndPermissionsSeeder extends Seeder
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $permissionsByRole = [
-            RoleEnum::Admin->value => [
-                PermissionEnum::ViewAdminPanel->value,
-                PermissionEnum::ManageUsers->value,
-                PermissionEnum::ManagePlants->value,
-                PermissionEnum::ManageZones->value,
-                PermissionEnum::ManageMachines->value,
-                PermissionEnum::ImportData->value,
-                PermissionEnum::ViewAuditLogs->value,
-                PermissionEnum::DeleteMoulds->value,
-            ],
+            RoleEnum::Admin->value => array_column(PermissionEnum::cases(), 'value'),
             RoleEnum::Production->value => [
                 PermissionEnum::ViewMainDashboard->value,
                 PermissionEnum::ViewProductionSection->value,

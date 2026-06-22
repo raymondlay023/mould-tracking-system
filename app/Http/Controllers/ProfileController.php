@@ -16,6 +16,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        if ($request->routeIs('mobile.profile.edit')) {
+            return view('profile.mobile-edit', [
+                'user' => $request->user(),
+            ]);
+        }
+
         return view('profile.edit', [
             'user' => $request->user(),
         ]);
@@ -34,7 +40,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::back()->with('status', 'profile-updated');
     }
 
     /**

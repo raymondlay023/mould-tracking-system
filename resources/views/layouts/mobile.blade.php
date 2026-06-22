@@ -25,10 +25,30 @@
                 <x-application-logo class="h-6 w-auto fill-current text-blue-600" />
                 <span class="font-bold text-lg tracking-tight">MouldTrack</span>
             </div>
-            <div class="flex items-center gap-2">
-                 <div class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
-                    {{ substr(auth()->user()->name, 0, 2) }}
-                 </div>
+            <div class="flex items-center gap-3">
+                <livewire:partials.notification-bell />
+
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button class="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 hover:bg-slate-300 transition focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                        </button>
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('mobile.profile.edit')">
+                            {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <!-- Authentication -->
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
             </div>
         </header>
 

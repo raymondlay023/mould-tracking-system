@@ -70,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/moulds/{mould}/move', \App\Livewire\Mobile\MoveMould::class)->name('moulds.move');
         Route::get('/jobs', \App\Livewire\Mobile\Jobs::class)->name('jobs');
         Route::get('/runs/{run}/end', \App\Livewire\Mobile\EndRun::class)->name('runs.end');
+        Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     });
 
     /**
