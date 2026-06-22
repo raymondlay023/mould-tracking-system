@@ -7,7 +7,7 @@
         {{-- Camera Viewport --}}
         <div id="reader" class="rounded-lg overflow-hidden bg-black aspect-square relative">
              {{-- Overlay or Loading State --}}
-             <div class="absolute inset-0 flex items-center justify-center text-white/50 text-sm">
+             <div id="camera-loading" class="absolute inset-0 flex items-center justify-center text-white/50 text-sm z-10 pointer-events-none">
                  Initializing Camera...
              </div>
         </div>
@@ -29,26 +29,42 @@
     @script
     <script>
     document.addEventListener('livewire:initialized', function () {
-        Livewire.hook('morph.added', function (params) {
-            // Re-init if needed
-        });
+        let html5QrCode;
 
-        const onScanSuccess = function (decodedText, decodedResult) {
-            console.log('Code matched', decodedText);
-            html5QrcodeScanner.clear();
-            $wire.handleScan(decodedText);
-        };
-
-        const onScanFailure = function (error) {
+        const startCamera = () => {
+            if (html5QrCode) {
+                html5QrCode.stop().catch(e => console.log(e));
+            }
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                (decodedText, decodedResult) => {
+                    console.log('Code matched', decodedText);
+                    html5QrCode.stop().then(() => {
+                        $wire.handleScan(decodedText);
+                    }).catch(err => {
+                        $wire.handleScan(decodedText);
+                    });
+                },
+                (errorMessage) => {
+                    // ignore parse errors
+                }
+            ).then(() => {
+                const loadingEl = document.getElementById('camera-loading');
+                if(loadingEl) loadingEl.style.display = 'none';
+            }).catch((err) => {
+                console.warn("Camera start error:", err);
+                const loadingEl = document.getElementById('camera-loading');
+                if(loadingEl) {
+                    loadingEl.style.pointerEvents = 'auto';
+                    loadingEl.innerHTML = '<div class="text-center p-4"><p class="mb-2">Camera access denied.</p><button onclick="window.location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Retry</button></div>';
+                }
+            });
         };
 
         if (document.getElementById('reader')) {
-             const html5QrcodeScanner = new Html5QrcodeScanner(
-                'reader',
-                { fps: 10, qrbox: {width: 250, height: 250} },
-                false
-            );
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            startCamera();
         }
     });
     </script>
