@@ -6,10 +6,12 @@
 README.md
 docs/
 
-# Docker files (not needed in production)
-docker/
+# Docker files (only dev-specific files excluded; prod configs are needed)
+docker/nginx/
 docker-compose*.yml
 .dockerignore
+Dockerfile
+docker/php/Dockerfile
 
 # Development dependencies
 node_modules/

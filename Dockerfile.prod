@@ -1,0 +1,92 @@
+# Stage 1: Composer build
+FROM composer:2.7 AS vendor
+
+WORKDIR /app
+COPY database/ database/
+COPY composer.json composer.lock ./
+
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --ignore-platform-reqs \
+    --optimize-autoloader \
+    --no-scripts
+
+# Stage 2: Node.js frontend build
+FROM node:20-alpine AS frontend
+
+WORKDIR /app
+COPY package.json package-lock.json postcss.config.js tailwind.config.js vite.config.js ./
+RUN npm ci
+
+COPY resources/ resources/
+COPY public/ public/
+RUN npm run build
+
+# Stage 3: Final Production Image
+FROM php:8.2-fpm-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    mysql-client \
+    curl \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    bash \
+    tzdata \
+    pcre-dev \
+    $PHPIZE_DEPS
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg \
+ && docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    intl \
+    zip \
+    pcntl \
+    gd \
+    opcache \
+ && pecl install redis \
+ && docker-php-ext-enable redis \
+ && apk del pcre-dev $PHPIZE_DEPS
+
+# Use the production php.ini and apply custom settings
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/custom.ini
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . .
+
+# Copy vendor from composer stage
+COPY --from=vendor /app/vendor/ vendor/
+
+# Copy built frontend assets
+COPY --from=frontend /app/public/build/ public/build/
+
+# Setup directories and permissions
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod -R 755 public
+
+# Set Entrypoint (copied before .dockerignore strips docker/ on COPY . .)
+COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm"]
