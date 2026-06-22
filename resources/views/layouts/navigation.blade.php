@@ -44,7 +44,7 @@
         </div>
 
         <!-- OPERATIONS -->
-        @can('access_operations')
+        @can('operations.access')
             <div class="space-y-1">
                 <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Operations') }}</p>
                 
@@ -105,7 +105,7 @@
         <div class="space-y-1">
             <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Portals') }}</p>
             
-            @can('view_production_section')
+            @can('production.view')
                 <x-sidebar-link :href="route('production.index')" :active="request()->routeIs('production.index')">
                     <x-slot name="icon">
                         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -116,7 +116,7 @@
                 </x-sidebar-link>
             @endcan
 
-            @can('view_maintenance_section')
+            @can('maintenance.view')
                 <x-sidebar-link :href="route('maintenance.home')" :active="request()->routeIs('maintenance.home')">
                     <x-slot name="icon">
                         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -127,7 +127,7 @@
                 </x-sidebar-link>
             @endcan
 
-            @can('view_qa_section')
+            @can('qa.view')
                 <x-sidebar-link :href="route('qa.index')" :active="request()->routeIs('qa.index')">
                     <x-slot name="icon">
                         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -140,7 +140,7 @@
         </div>
 
         <!-- ANALYTICS & REPORTS -->
-        @can('access_operations')
+        @can('operations.access')
             <div class="space-y-1">
                 <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Analytics & Reports') }}</p>
                 
@@ -174,7 +174,7 @@
         @endcan
 
         <!-- SYSTEM ADMINISTRATION -->
-        @can('view_admin_panel')
+        @can('admin_panel.view')
             <div class="space-y-1">
                 <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Administration') }}</p>
                 

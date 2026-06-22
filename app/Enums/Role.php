@@ -4,11 +4,11 @@ namespace App\Enums;
 
 enum Role: string
 {
-    case Admin       = 'Admin';
-    case Production  = 'Production';
-    case Maintenance = 'Maintenance';
-    case QA          = 'QA';
-    case Viewer      = 'Viewer';
-    case Supervisor  = 'Supervisor';
-    case Manager     = 'Manager';
+    case Admin       = 'admin';
+    case Production  = 'production';
+    case Maintenance = 'maintenance';
+    case QA          = 'qa';
+    case Viewer      = 'viewer';
+    case Supervisor  = 'supervisor';
+    case Manager     = 'manager';
 }

@@ -6,7 +6,7 @@
             <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-900 to-indigo-600 tracking-tight">Parts Registry</h1>
             <p class="text-sm text-gray-500 mt-1">Manage registered parts and their mould associations</p>
         </div>
-        @can('view_admin_panel')
+        @can('admin_panel.view')
             <button type="button" wire:click="createNew"
                 class="px-5 py-2.5 rounded-xl bg-indigo-700 text-white font-medium hover:bg-indigo-800 transition-all shadow-lg shadow-indigo-200 transform hover:-translate-y-0.5 flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -38,7 +38,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {{-- ─── Form Panel ─── --}}
-        @can('view_admin_panel')
+        @can('admin_panel.view')
         <div class="bg-white/80 backdrop-blur-xl shadow-xl rounded-3xl border border-white/50 p-6 h-fit sticky top-24">
             <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
                 <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
@@ -187,7 +187,7 @@
                                 <th class="py-3 px-5 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Part Name</th>
                                 <th class="py-3 px-5 text-left font-semibold text-gray-600 uppercase tracking-wider text-xs">Mould</th>
                                 <th class="py-3 px-5 text-center font-semibold text-gray-600 uppercase tracking-wider text-xs">Cavity</th>
-                                @can('view_admin_panel')
+                                @can('admin_panel.view')
                                     <th class="py-3 px-5 text-right font-semibold text-gray-600 uppercase tracking-wider text-xs">Actions</th>
                                 @endcan
                             </tr>
@@ -236,7 +236,7 @@
                                     </td>
 
                                     {{-- Actions --}}
-                                    @can('view_admin_panel')
+                                    @can('admin_panel.view')
                                         <td class="py-3.5 px-5 text-right">
                                             <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <button type="button" wire:click="edit('{{ $part->id }}')"

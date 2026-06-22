@@ -36,9 +36,6 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::ViewMainDashboard->value,
                 PermissionEnum::ViewMaintenanceSection->value,
                 PermissionEnum::AccessOperations->value,
-                PermissionEnum::ManageSetups->value,
-                PermissionEnum::CloseRuns->value,
-                PermissionEnum::ManageMoulds->value,
                 PermissionEnum::CreateMaintenanceEvents->value,
                 PermissionEnum::DeleteMaintenanceEvents->value,
                 PermissionEnum::MoveLocations->value,
@@ -49,6 +46,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::AccessOperations->value,
                 PermissionEnum::ManageTrials->value,
                 PermissionEnum::VerifyTrials->value,
+                PermissionEnum::MoveLocations->value,
             ],
             RoleEnum::Viewer->value => [
                 PermissionEnum::ViewMainDashboard->value,
@@ -56,11 +54,23 @@ class RolesAndPermissionsSeeder extends Seeder
             ],
             RoleEnum::Supervisor->value => [
                 PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::ViewProductionSection->value,
+                PermissionEnum::ViewQaSection->value,
                 PermissionEnum::AccessOperations->value,
+                PermissionEnum::ManageTrials->value,
+                PermissionEnum::ManageSetups->value,
+                PermissionEnum::CloseRuns->value,
+                PermissionEnum::ManageMoulds->value,
+                PermissionEnum::MoveLocations->value,
+                PermissionEnum::VerifyTrials->value,
             ],
             RoleEnum::Manager->value => [
                 PermissionEnum::ViewMainDashboard->value,
+                PermissionEnum::ViewProductionSection->value,
+                PermissionEnum::ViewMaintenanceSection->value,
+                PermissionEnum::ViewQaSection->value,
                 PermissionEnum::AccessOperations->value,
+                PermissionEnum::ManageMachines->value,
             ],
         ];
 

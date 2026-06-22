@@ -5,33 +5,33 @@ namespace App\Enums;
 enum Permission: string
 {
     // Admin
-    case ViewAdminPanel          = 'view_admin_panel';
-    case ManageUsers             = 'manage_users';
-    case ManagePlants            = 'manage_plants';
-    case ManageZones             = 'manage_zones';
-    case ManageMachines          = 'manage_machines';
-    case ImportData              = 'import_data';
-    case ViewAuditLogs           = 'view_audit_logs';
-    case DeleteMoulds            = 'delete_moulds';
+    case ViewAdminPanel          = 'admin_panel.view';
+    case ManageUsers             = 'users.manage';
+    case ManagePlants            = 'plants.manage';
+    case ManageZones             = 'zones.manage';
+    case ManageMachines          = 'machines.manage';
+    case ImportData              = 'data.import';
+    case ViewAuditLogs           = 'audit_logs.view';
+    case DeleteMoulds            = 'moulds.delete';
 
     // General / Dashboard
-    case ViewMainDashboard       = 'view_main_dashboard';
-    case AccessOperations        = 'access_operations';
+    case ViewMainDashboard       = 'dashboard.view';
+    case AccessOperations        = 'operations.access';
 
     // Production
-    case ViewProductionSection   = 'view_production_section';
-    case ManageTrials            = 'manage_trials';
-    case ManageSetups            = 'manage_setups';
-    case CloseRuns               = 'close_runs';
-    case ManageMoulds            = 'manage_moulds';
-    case MoveLocations           = 'move_locations';
+    case ViewProductionSection   = 'production.view';
+    case ManageTrials            = 'trials.manage';
+    case ManageSetups            = 'setups.manage';
+    case CloseRuns               = 'runs.close';
+    case ManageMoulds            = 'moulds.manage';
+    case MoveLocations           = 'locations.move';
 
     // Maintenance
-    case ViewMaintenanceSection      = 'view_maintenance_section';
-    case CreateMaintenanceEvents     = 'create_maintenance_events';
-    case DeleteMaintenanceEvents     = 'delete_maintenance_events';
+    case ViewMaintenanceSection      = 'maintenance.view';
+    case CreateMaintenanceEvents     = 'maintenance_events.create';
+    case DeleteMaintenanceEvents     = 'maintenance_events.delete';
 
     // QA
-    case ViewQaSection           = 'view_qa_section';
-    case VerifyTrials            = 'verify_trials';
+    case ViewQaSection           = 'qa.view';
+    case VerifyTrials            = 'trials.verify';
 }

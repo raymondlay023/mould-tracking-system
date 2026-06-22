@@ -37,26 +37,26 @@ Route::middleware(['auth'])->group(function () {
      * Kalau sudah pakai Gate: ganti middleware ini jadi ->middleware(['can:view-dashboard'])
      */
     Route::get('/dashboard', Summary::class)
-        ->middleware(['can:view_main_dashboard'])
+        ->middleware(['can:dashboard.view'])
         ->name('dashboard');
 
     /**
      * Area landing per role
      */
     Route::get('/admin', \App\Livewire\Admin\Dashboard::class)
-        ->middleware(['can:view_admin_panel'])
+        ->middleware(['can:admin_panel.view'])
         ->name('admin.index');
 
     Route::get('/production', \App\Livewire\Production\Dashboard::class)
-        ->middleware(['can:view_production_section'])
+        ->middleware(['can:production.view'])
         ->name('production.index');
 
     Route::get('/maintenance', \App\Livewire\Maintenance\Dashboard::class)
-        ->middleware(['can:view_maintenance_section'])
+        ->middleware(['can:maintenance.view'])
         ->name('maintenance.home');
 
     Route::get('/qa', \App\Livewire\Qa\Dashboard::class)
-        ->middleware(['can:view_qa_section'])
+        ->middleware(['can:qa.view'])
         ->name('qa.index');
 
     /**
@@ -76,7 +76,7 @@ Route::middleware(['auth'])->group(function () {
     /**
      * Operasional umum (semua role yang boleh operasional)
      */
-    Route::middleware(['can:access_operations'])->group(function () {
+    Route::middleware(['can:operations.access'])->group(function () {
         // Mould
         Route::get('/moulds', MouldIndex::class)->name('moulds.index');
         Route::get('/moulds/{mould}', MouldShow::class)->name('moulds.show');
@@ -110,7 +110,7 @@ Route::middleware(['auth'])->group(function () {
     /**
      * Admin only (master data + tools)
      */
-    Route::middleware(['can:view_admin_panel'])->group(function () {
+    Route::middleware(['can:admin_panel.view'])->group(function () {
         // Import & QR
         Route::get('/import/moulds', MouldImport::class)->name('import.moulds');
         Route::get('/qr/moulds', MouldQrBatch::class)->name('qr.moulds');
