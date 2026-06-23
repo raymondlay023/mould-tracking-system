@@ -1,5 +1,5 @@
 <div>
-    <div class="space-y-4" x-data="{ scanning: true, result: null, errorMessage: null }">
+    <div class="space-y-4" x-data="{ scanning: true, result: null, errorMessage: null }" @scan-error.window="errorMessage = $event.detail.message; scanning = false">
         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
             
             {{-- Tabs --}}
@@ -23,18 +23,27 @@
                          Initializing Camera...
                      </div>
                 </div>
+
+                {{-- Error Message --}}
+                <div x-cloak x-show="errorMessage" class="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 mt-4">
+                    <div class="font-bold text-sm mb-1">Scan Failed</div>
+                    <div class="text-xs mb-3" x-text="errorMessage"></div>
+                    <button @click="errorMessage = null; scanning = true; $dispatch('restart-camera')" class="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold w-full">Scan Again</button>
+                </div>
                 
                 {{-- Simulation for Desktop/Testing --}}
-                <div class="mt-4 pt-4 border-t border-slate-100">
-                    <label class="block text-xs font-medium text-slate-700 mb-1">Simulate Scan (Debug)</label>
-                    <div class="flex gap-2">
-                        <input type="text" x-model="result" placeholder="e.g. MOULD:uuid" class="flex-1 text-sm rounded-lg border-slate-300">
-                        <button @click="$wire.handleScan(result)" class="bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-bold">GO</button>
+                @env('local')
+                    <div class="mt-4 pt-4 border-t border-slate-100">
+                        <label class="block text-xs font-medium text-slate-700 mb-1">Simulate Scan (Debug)</label>
+                        <div class="flex gap-2">
+                            <input type="text" x-model="result" placeholder="e.g. MOULD:uuid" class="flex-1 text-sm rounded-lg border-slate-300">
+                            <button @click="$wire.handleScan(result)" class="bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-bold">GO</button>
+                        </div>
                     </div>
-                </div>
+                @endenv
             @else
                 <h1 class="text-xl font-bold text-slate-900 mb-2">Manual Selection</h1>
-                <p class="text-xs text-slate-500 mb-4">Search for a mould or machine by its code or name.</p>
+                <p class="text-xs text-slate-500 mb-4">Search for a mould (by code, name, or part no) or machine.</p>
                 
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -42,7 +51,7 @@
                           <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <input wire:model.live.debounce.300ms="search" type="text" class="pl-10 w-full text-sm rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Search M-01 or Machine name...">
+                    <input wire:model.live.debounce.300ms="search" type="text" class="pl-10 w-full text-sm rounded-lg border-slate-300 focus:ring-blue-500 focus:border-blue-500" placeholder="Search M-01, part name, or machine...">
                 </div>
 
                 @if(strlen($search) >= 2)
@@ -106,48 +115,82 @@
                 let html5QrCode;
 
                 const startCamera = () => {
-                    if (html5QrCode) {
-                        html5QrCode.stop().catch(e => console.log(e));
+                    if (!html5QrCode) {
+                        html5QrCode = new Html5Qrcode("reader");
                     }
-                    html5QrCode = new Html5Qrcode("reader");
-                    html5QrCode.start(
-                        { facingMode: "environment" }, 
-                        { fps: 10, qrbox: { width: 250, height: 250 } },
-                        (decodedText, decodedResult) => {
-                            console.log('Code matched', decodedText);
+
+                    const doStart = () => {
+                        // show loading text
+                        const loadingEl = document.getElementById('camera-loading');
+                        if (loadingEl) {
+                            loadingEl.style.display = 'flex';
+                            loadingEl.style.pointerEvents = 'none';
+                            loadingEl.innerHTML = 'Initializing Camera...';
+                        }
+
+                        html5QrCode.start(
+                            { facingMode: "environment" }, 
+                            { fps: 10, qrbox: { width: 250, height: 250 } },
+                            (decodedText, decodedResult) => {
+                                console.log('Code matched', decodedText);
+                                html5QrCode.stop().then(() => {
+                                    $wire.handleScan(decodedText);
+                                }).catch(err => {
+                                    $wire.handleScan(decodedText);
+                                });
+                            },
+                            (errorMessage) => {
+                                // ignore parse errors
+                            }
+                        ).then(() => {
+                            if(loadingEl) loadingEl.style.display = 'none';
+                        }).catch((err) => {
+                            console.warn("Camera start error:", err);
+                            if(loadingEl) {
+                                loadingEl.style.pointerEvents = 'auto';
+                                loadingEl.innerHTML = '<div class="text-center p-4"><p class="mb-2">Camera access denied.</p><button onclick="window.location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Retry</button></div>';
+                            }
+                        });
+                    };
+
+                    try {
+                        if (html5QrCode.isScanning) {
                             html5QrCode.stop().then(() => {
-                                $wire.handleScan(decodedText);
-                            }).catch(err => {
-                                $wire.handleScan(decodedText);
+                                html5QrCode.clear();
+                                doStart();
+                            }).catch(e => {
+                                html5QrCode.clear();
+                                doStart();
                             });
-                        },
-                        (errorMessage) => {
-                            // ignore parse errors
+                        } else {
+                            html5QrCode.clear();
+                            doStart();
                         }
-                    ).then(() => {
-                        const loadingEl = document.getElementById('camera-loading');
-                        if(loadingEl) loadingEl.style.display = 'none';
-                    }).catch((err) => {
-                        console.warn("Camera start error:", err);
-                        const loadingEl = document.getElementById('camera-loading');
-                        if(loadingEl) {
-                            loadingEl.style.pointerEvents = 'auto';
-                            loadingEl.innerHTML = '<div class="text-center p-4"><p class="mb-2">Camera access denied.</p><button onclick="window.location.reload()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold">Retry</button></div>';
-                        }
-                    });
+                    } catch (e) {
+                        doStart();
+                    }
                 };
 
-                // Watch for tab changes to start/stop camera
+                // Track reader visibility to only start/stop on tab change
+                let readerWasPresent = !!document.getElementById('reader');
+
                 Livewire.hook('commit', ({ component, commit, respond, succeed, fail }) => {
                     succeed(({ snapshot, effect }) => {
                         if (component.name === 'mobile.scanner') {
                             setTimeout(() => {
-                                if (document.getElementById('reader')) {
+                                const readerIsPresent = !!document.getElementById('reader');
+
+                                if (readerIsPresent && !readerWasPresent) {
+                                    // Switched to scan tab
                                     startCamera();
-                                } else if (html5QrCode) {
-                                    // Stop camera if we navigated to manual tab
-                                    try { html5QrCode.stop(); } catch(e) {}
+                                } else if (!readerIsPresent && readerWasPresent) {
+                                    // Switched away from scan tab
+                                    if (html5QrCode) {
+                                        try { html5QrCode.stop(); } catch(e) {}
+                                    }
                                 }
+
+                                readerWasPresent = readerIsPresent;
                             }, 50);
                         }
                     });
@@ -156,6 +199,12 @@
                 if (document.getElementById('reader')) {
                     startCamera();
                 }
+
+                window.addEventListener('restart-camera', () => {
+                    setTimeout(() => {
+                        startCamera();
+                    }, 50);
+                });
             });
         </script>
     @endscript

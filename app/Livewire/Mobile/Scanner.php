@@ -80,13 +80,19 @@ class Scanner extends Component
         $machines = collect();
 
         if (strlen($this->search) >= 2) {
-            $moulds = Mould::where('code', 'like', '%' . $this->search . '%')
-                ->orWhere('name', 'like', '%' . $this->search . '%')
-                ->limit(5)->get();
+            $moulds = Mould::where(function($q) {
+                $q->where('code', 'like', '%' . $this->search . '%')
+                  ->orWhere('name', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('parts', function ($query) {
+                      $query->where('part_number', 'like', '%' . $this->search . '%')
+                            ->orWhere('part_name', 'like', '%' . $this->search . '%');
+                  });
+            })->limit(5)->get();
             
-            $machines = Machine::where('code', 'like', '%' . $this->search . '%')
-                ->orWhere('name', 'like', '%' . $this->search . '%')
-                ->limit(5)->get();
+            $machines = Machine::where(function($q) {
+                $q->where('code', 'like', '%' . $this->search . '%')
+                  ->orWhere('name', 'like', '%' . $this->search . '%');
+            })->limit(5)->get();
         }
 
         return view('livewire.mobile.scanner', [
