@@ -42,4 +42,44 @@
             @endforelse
         </div>
     </div>
+
+    @can('maintenance_events.create')
+    {{-- Active Work Orders --}}
+    <div class="pt-2">
+        <h2 class="text-sm font-bold text-slate-900 mb-3 uppercase tracking-wider">Active Work Orders</h2>
+        
+        <div class="space-y-3">
+            @forelse($activeWorkOrders as $wo)
+                <a wire:navigate href="{{ route('mobile.mould-detail', ['mould' => $wo->mould_id]) }}" class="block bg-white p-4 rounded-xl shadow-sm border border-slate-100 active:scale-95 transition-transform">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="font-bold text-slate-900">{{ $wo->mould->code }}</div>
+                            <div class="text-xs text-slate-500">{{ $wo->type }} • {{ Str::limit($wo->description, 30) }}</div>
+                        </div>
+                        <div class="text-right">
+                            @if($wo->status === 'IN_PROGRESS')
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-bold">
+                                    IN PROGRESS
+                                </span>
+                            @elseif($wo->status === 'REQUESTED')
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-orange-100 text-orange-700 text-xs font-bold">
+                                    REQUESTED
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-1 rounded bg-purple-100 text-purple-700 text-xs font-bold">
+                                    {{ $wo->status }}
+                                </span>
+                            @endif
+                            <div class="text-xs text-slate-400 mt-1">{{ $wo->created_at->diffForHumans() }}</div>
+                        </div>
+                    </div>
+                </a>
+            @empty
+                <div class="text-center py-8 text-slate-400 bg-white rounded-xl border border-dashed border-slate-200">
+                    <p class="text-sm">No active work orders.</p>
+                </div>
+            @endforelse
+        </div>
+    </div>
+    @endcan
 </div>

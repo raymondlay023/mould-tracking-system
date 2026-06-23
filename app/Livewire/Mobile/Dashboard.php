@@ -4,6 +4,8 @@ namespace App\Livewire\Mobile;
 
 use Livewire\Component;
 use App\Models\ProductionRun;
+use App\Models\MaintenanceEvent;
+use Illuminate\Support\Facades\Gate;
 
 class Dashboard extends Component
 {
@@ -16,7 +18,16 @@ class Dashboard extends Component
             ->limit(5)
             ->get();
 
-        return view('livewire.mobile.dashboard', compact('myActiveRuns'))
+        $activeWorkOrders = collect();
+        if (Gate::allows('maintenance_events.create')) {
+            $activeWorkOrders = MaintenanceEvent::with(['mould'])
+                ->whereIn('status', ['REQUESTED', 'APPROVED', 'IN_PROGRESS'])
+                ->latest('updated_at')
+                ->limit(5)
+                ->get();
+        }
+
+        return view('livewire.mobile.dashboard', compact('myActiveRuns', 'activeWorkOrders'))
             ->layout('layouts.mobile');
     }
 }
