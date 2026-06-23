@@ -53,6 +53,8 @@ services:
       MYSQL_USER: ${DB_USERNAME}
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    ports:
+      - "127.0.0.1:3308:3306"
     volumes:
       - dbdata_prod:/var/lib/mysql
     networks:
