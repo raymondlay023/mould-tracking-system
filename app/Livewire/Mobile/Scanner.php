@@ -10,6 +10,16 @@ class Scanner extends Component
 {
     public function handleScan($code)
     {
+        if (str_starts_with($code, 'MACHINE:')) {
+            $id = str_replace('MACHINE:', '', $code);
+            $machine = \App\Models\Machine::find($id);
+            if ($machine) {
+                return redirect()->route('mobile.jobs', ['machine' => $id]);
+            }
+            $this->dispatch('scan-error', message: 'Machine not found: ' . $code);
+            return;
+        }
+
         // Expected format: MOULD:uuid or just uuid? 
         // Let's support both.
         $id = str_replace('MOULD:', '', $code);

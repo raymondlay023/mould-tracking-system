@@ -6,18 +6,18 @@
     @endif
 
     {{-- Header --}}
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+    <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
         <div class="flex justify-between items-start">
             <div>
                  <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-blue-100 text-blue-700 mb-2">
                     {{ $mould->status }}
                 </span>
-                <h1 class="text-2xl font-bold text-gray-900">{{ $mould->code }}</h1>
-                <p class="text-sm text-gray-500">{{ $mould->name }}</p>
+                <h1 class="text-2xl font-bold text-slate-900">{{ $mould->code }}</h1>
+                <p class="text-sm text-slate-500">{{ $mould->name }}</p>
             </div>
             <div class="text-right">
-                <div class="text-xs text-gray-400">Location</div>
-                <div class="font-medium text-gray-700">{{ $mould->location ?? 'N/A' }}</div>
+                <div class="text-xs text-slate-400">Location</div>
+                <div class="font-medium text-slate-700">{{ $mould->location ?? 'N/A' }}</div>
             </div>
         </div>
     </div>
@@ -49,7 +49,7 @@
 
         @can('locations.move')
         {{-- Move Button --}}
-        <a wire:navigate href="{{ route('mobile.moulds.move', ['mould' => $mould->id]) }}" class="w-full bg-white border border-gray-200 text-gray-700 py-4 rounded-xl font-bold shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform">
+        <a wire:navigate href="{{ route('mobile.moulds.move', ['mould' => $mould->id]) }}" class="w-full bg-white border border-slate-200 text-slate-700 py-4 rounded-xl font-bold shadow-sm flex items-center justify-center gap-2 active:scale-95 transition-transform">
              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
             Update Location
         </a>
@@ -66,13 +66,13 @@
 
     {{-- Stats --}}
     <div class="grid grid-cols-2 gap-4">
-        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center">
-            <div class="text-xs text-gray-400">Total Shots</div>
+        <div class="bg-white p-3 rounded-lg border border-slate-100 text-center">
+            <div class="text-xs text-slate-400">Total Shots</div>
             <div class="font-mono font-bold text-lg">{{ number_format($mould->total_shots) }}</div>
         </div>
-        <div class="bg-white p-3 rounded-lg border border-gray-100 text-center">
-            <div class="text-xs text-gray-400">Next PM</div>
-            <div class="font-mono font-bold text-lg text-{{ $mould->next_pm_due ? 'red' : 'gray' }}-600">
+        <div class="bg-white p-3 rounded-lg border border-slate-100 text-center">
+            <div class="text-xs text-slate-400">Next PM</div>
+            <div class="font-mono font-bold text-lg text-{{ $mould->next_pm_due ? 'red' : 'slate' }}-600">
                 {{ number_format($mould->pm_interval_shot - ($mould->total_shots - $mould->last_pm_at_shot)) }}
             </div>
         </div>
@@ -82,29 +82,29 @@
     @if($showMaintenanceModal)
     <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 class="font-bold text-gray-900">Log Maintenance</h3>
-                <button wire:click="$set('showMaintenanceModal', false)" class="text-gray-400 hover:text-gray-600">
+            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-bold text-slate-900">Log Maintenance</h3>
+                <button wire:click="$set('showMaintenanceModal', false)" class="text-slate-400 hover:text-slate-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <div class="p-4 space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                    <select wire:model="maintenanceType" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                    <select wire:model="maintenanceType" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="CM">Corrective (CM)</option>
                         <option value="PM">Preventive (PM)</option>
                     </select>
                     @error('maintenanceType') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea wire:model="maintenanceDescription" rows="3" class="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Describe the issue or work needed..."></textarea>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                    <textarea wire:model="maintenanceDescription" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Describe the issue or work needed..."></textarea>
                     @error('maintenanceDescription') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
-            <div class="p-4 border-t border-gray-100 flex gap-2">
-                <button wire:click="$set('showMaintenanceModal', false)" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm">Cancel</button>
+            <div class="p-4 border-t border-slate-100 flex gap-2">
+                <button wire:click="$set('showMaintenanceModal', false)" class="flex-1 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium text-sm">Cancel</button>
                 <button wire:click="submitMaintenance" class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm">Submit</button>
             </div>
         </div>

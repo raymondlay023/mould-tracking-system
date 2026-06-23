@@ -48,7 +48,7 @@ class MouldDetail extends Component
             'mould_id' => $this->mould->id,
             'type' => $this->maintenanceType,
             'description' => $this->maintenanceDescription,
-            'start_ts' => now()->setTimezone('UTC'),
+            'start_ts' => now(),
             'status' => 'REQUESTED',
         ]);
 

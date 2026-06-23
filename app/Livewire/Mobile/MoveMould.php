@@ -13,6 +13,7 @@ class MoveMould extends Component
 {
     public Mould $mould;
     public string $moveLocation = 'TOOL_ROOM';
+    public ?string $movePlantId = null;
     public ?string $moveMachineId = null;
     public ?string $moveNote = null;
 
@@ -28,6 +29,7 @@ class MoveMould extends Component
 
         $v = $this->validate([
             'moveLocation' => 'required|in:TOOL_ROOM,WAREHOUSE,IN_TRANSIT,MACHINE',
+            'movePlantId' => 'nullable|exists:plants,id',
             'moveMachineId' => 'nullable|exists:machines,id',
             'moveNote' => 'nullable|string|max:255',
         ]);
@@ -47,7 +49,7 @@ class MoveMould extends Component
 
             LocationHistory::create([
                 'mould_id' => $this->mould->id,
-                'plant_id' => null,
+                'plant_id' => $v['movePlantId'] ?: null,
                 'machine_id' => $v['moveLocation'] === 'MACHINE' ? $v['moveMachineId'] : null,
                 'location' => $v['moveLocation'],
                 'start_ts' => now(),
@@ -64,7 +66,8 @@ class MoveMould extends Component
     public function render()
     {
         $machines = Machine::with(['plant','zone'])->orderBy('code')->get();
-        return view('livewire.mobile.move-mould', compact('machines'))
+        $plants = \App\Models\Plant::orderBy('name')->get();
+        return view('livewire.mobile.move-mould', compact('machines', 'plants'))
             ->layout('layouts.mobile');
     }
 }

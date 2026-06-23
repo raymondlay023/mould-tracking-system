@@ -14,10 +14,11 @@ class StartRun extends Component
     public Mould $mould;
     public string $startMachineId = '';
     public ?string $startOperatorName = null;
+    public ?string $startNotes = null;
 
     public function mount(Mould $mould)
     {
-        abort_if(Gate::denies('close_runs'), 403);
+        abort_if(Gate::denies('operations.access'), 403);
         $this->mould = $mould;
         $this->startOperatorName = auth()->user()->name ?? '';
 
@@ -33,11 +34,12 @@ class StartRun extends Component
 
     public function submitStartRun()
     {
-        abort_if(Gate::denies('close_runs'), 403);
+        abort_if(Gate::denies('operations.access'), 403);
 
         $this->validate([
             'startMachineId' => 'required|exists:machines,id',
             'startOperatorName' => 'nullable|string|max:100',
+            'startNotes' => 'nullable|string|max:2000',
         ]);
 
         $machineHasActive = ProductionRun::query()
@@ -62,6 +64,7 @@ class StartRun extends Component
                 'ok_part' => 0,
                 'ng_part' => 0,
                 'operator_name' => $this->startOperatorName,
+                'notes' => $this->startNotes,
             ]);
 
             $this->mould->update(['status' => 'IN_RUN']);

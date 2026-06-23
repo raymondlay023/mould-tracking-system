@@ -62,7 +62,7 @@ Route::middleware(['auth'])->group(function () {
     /**
      * Mobile App (Shop Floor)
      */
-    Route::prefix('app')->name('mobile.')->group(function () {
+    Route::prefix('app')->name('mobile.')->middleware(['can:operations.access'])->group(function () {
         Route::get('/dashboard', \App\Livewire\Mobile\Dashboard::class)->name('dashboard');
         Route::get('/scan', \App\Livewire\Mobile\Scanner::class)->name('scanner');
         Route::get('/moulds/{mould}', \App\Livewire\Mobile\MouldDetail::class)->name('mould-detail');
