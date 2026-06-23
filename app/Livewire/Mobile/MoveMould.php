@@ -19,13 +19,13 @@ class MoveMould extends Component
 
     public function mount(Mould $mould)
     {
-        abort_if(Gate::denies('move_locations'), 403);
+        abort_if(Gate::denies('locations.move'), 403);
         $this->mould = $mould;
     }
 
     public function submitMoveMould()
     {
-        abort_if(Gate::denies('move_locations'), 403);
+        abort_if(Gate::denies('locations.move'), 403);
 
         $v = $this->validate([
             'moveLocation' => 'required|in:TOOL_ROOM,WAREHOUSE,IN_TRANSIT,MACHINE',

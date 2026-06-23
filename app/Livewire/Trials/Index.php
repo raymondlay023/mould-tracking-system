@@ -72,7 +72,7 @@ class Index extends Component
     public function save(): void
     {
         // Security Check
-        abort_if(Gate::denies('manage_trials'), 403, 'Unauthorized');
+        abort_if(Gate::denies('trials.manage'), 403, 'Unauthorized');
 
         $v = $this->validate();
         $tz = auth()->user()->timezone ?? 'UTC';
@@ -92,7 +92,7 @@ class Index extends Component
     public function delete(string $id): void
     {
         // Security Check
-        abort_if(Gate::denies('verify_trials'), 403, 'Unauthorized');
+        abort_if(Gate::denies('trials.verify'), 403, 'Unauthorized');
 
         TrialEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Trial deleted.');
@@ -112,7 +112,7 @@ class Index extends Component
     private function approve(string $id, bool $go): void
     {
         // Security Check: Only QA/Admin can approve
-        abort_if(Gate::denies('verify_trials'), 403, 'Unauthorized');
+        abort_if(Gate::denies('trials.verify'), 403, 'Unauthorized');
 
 
         $userName = auth()->user()?->name ?? 'Unknown';

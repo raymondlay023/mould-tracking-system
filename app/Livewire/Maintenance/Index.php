@@ -140,7 +140,7 @@ class Index extends Component
     public function save(): void
     {
         // Security Check
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403, 'Unauthorized');
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403, 'Unauthorized');
 
         $v = $this->validate();
 
@@ -192,7 +192,7 @@ class Index extends Component
     public function delete(string $id): void
     {
         // Security Check
-        abort_if(Gate::denies('delete_maintenance_events'), 403, 'Unauthorized');
+        abort_if(Gate::denies('maintenance_events.delete'), 403, 'Unauthorized');
 
         MaintenanceEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Maintenance deleted.');

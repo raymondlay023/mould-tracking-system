@@ -60,7 +60,7 @@ class WorkOrders extends Component
 
     public function saveNew()
     {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403);
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $this->validate([
             'newMouldId' => 'required|exists:moulds,id',
@@ -84,7 +84,7 @@ class WorkOrders extends Component
         $this->creating = false;
         
         // Notify
-        $recipients = \App\Models\User::permission('view_maintenance_section')->get();
+        $recipients = \App\Models\User::permission('maintenance.view')->get();
         if ($recipients->count() > 0) {
             \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\Maintenance\WorkOrderRequested($event = MaintenanceEvent::latest('id')->first()));
             // Note: retrieving latest() is a bit racy but simplest for now without changing create return
@@ -95,7 +95,7 @@ class WorkOrders extends Component
 
     public function approve($id)
     {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403);
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $ev = MaintenanceEvent::findOrFail($id);
         $ev->update(['status' => 'APPROVED']);
@@ -106,7 +106,7 @@ class WorkOrders extends Component
 
     public function start($id)
     {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403);
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $ev = MaintenanceEvent::findOrFail($id);
         $ev->update(['status' => 'IN_PROGRESS']);
@@ -117,7 +117,7 @@ class WorkOrders extends Component
     // Open Modal
     public function initiateCompletion($id)
     {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403);
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $this->completingId = $id;
         $this->reset(['downtime_min', 'cost', 'parts_used', 'notes']);
@@ -125,7 +125,7 @@ class WorkOrders extends Component
 
     public function complete(CompleteWorkOrderAction $action)
     {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403);
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $this->validate([
             'downtime_min' => 'required|integer|min:0',

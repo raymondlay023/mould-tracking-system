@@ -81,7 +81,7 @@ class Close extends Component
         }
 
         // Security Check
-        abort_if(Gate::denies('close_runs'), 403, 'Unauthorized');
+        abort_if(Gate::denies('runs.close'), 403, 'Unauthorized');
 
         $validated = $this->validate();
 

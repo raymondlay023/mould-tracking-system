@@ -31,7 +31,7 @@ class Move extends Component
 
     public function save()
     {
-        abort_if(Gate::denies('move_locations'), 403, 'Unauthorized');
+        abort_if(Gate::denies('locations.move'), 403, 'Unauthorized');
 
         $v = $this->validate();
 

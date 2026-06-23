@@ -37,7 +37,7 @@ class MouldDetail extends Component
 
     public function submitMaintenance()
     {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('create_maintenance_events'), 403);
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $this->validate([
             'maintenanceType' => 'required|in:PM,CM',

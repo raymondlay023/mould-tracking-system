@@ -72,7 +72,7 @@ class Index extends Component
     public function save(): void
     {
         // Security Check
-        abort_if(Gate::denies('manage_setups'), 403, 'Unauthorized');
+        abort_if(Gate::denies('setups.manage'), 403, 'Unauthorized');
 
         $v = $this->validate();
         $tz = auth()->user()->timezone ?? 'UTC';
@@ -92,7 +92,7 @@ class Index extends Component
     public function delete(string $id): void
     {
         // Security Check
-        abort_if(Gate::denies('manage_setups'), 403, 'Unauthorized');
+        abort_if(Gate::denies('setups.manage'), 403, 'Unauthorized');
 
         SetupEvent::where('id', '=', $id, 'and')->delete();
         session()->flash('success', 'Setup deleted.');

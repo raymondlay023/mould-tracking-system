@@ -62,7 +62,7 @@ class Index extends Component
 
     public function save(): void
     {
-        abort_if(!auth()->user()->can('view_admin_panel'), 403);
+        abort_if(!auth()->user()->can('admin_panel.view'), 403);
 
         $validated = $this->validate();
         $validated['part_number'] = strtoupper(trim($validated['part_number']));
@@ -75,7 +75,7 @@ class Index extends Component
 
     public function edit(string $id): void
     {
-        abort_if(!auth()->user()->can('view_admin_panel'), 403);
+        abort_if(!auth()->user()->can('admin_panel.view'), 403);
 
         $part = Part::findOrFail($id);
 
@@ -90,7 +90,7 @@ class Index extends Component
 
     public function createNew(): void
     {
-        abort_if(!auth()->user()->can('view_admin_panel'), 403);
+        abort_if(!auth()->user()->can('admin_panel.view'), 403);
 
         $this->resetForm();
         $this->resetValidation();
@@ -98,7 +98,7 @@ class Index extends Component
 
     public function delete(string $id): void
     {
-        abort_if(!auth()->user()->can('view_admin_panel'), 403);
+        abort_if(!auth()->user()->can('admin_panel.view'), 403);
 
         Part::where('id', $id)->delete();
         session()->flash('success', 'Part deleted successfully.');

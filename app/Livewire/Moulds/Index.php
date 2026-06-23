@@ -71,7 +71,7 @@ class Index extends Component
     public function save(\App\Actions\Moulds\CreateMouldAction $createAction): void
     {
         // Security: Block Viewer/QA from writing
-        abort_if(!auth()->user()->can('manage_moulds'), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('moulds.manage'), 403, 'Unauthorized');
 
         // Validation Rules definitions (still needed for binding, or we can use the Action's validator if we move it out)
         // Since Livewire does real-time validation, we generally keep rules() here. 
@@ -109,7 +109,7 @@ class Index extends Component
     public function edit(string $id): void
     {
         // Security: Block Viewer/QA
-        abort_if(!auth()->user()->can('manage_moulds'), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('moulds.manage'), 403, 'Unauthorized');
 
         $mould = Mould::findOrFail($id);
 
@@ -132,7 +132,7 @@ class Index extends Component
     public function createNew(): void
     {
         // Security: Block Viewer/QA
-        abort_if(!auth()->user()->can('manage_moulds'), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('moulds.manage'), 403, 'Unauthorized');
 
         $this->resetForm();
         $this->resetValidation();
@@ -142,9 +142,9 @@ class Index extends Component
     {
         // Security check for delete - maybe strict Admin?
         // Let's stick to restricting Viewers/QA
-        abort_if(!auth()->user()->can('delete_moulds'), 403, 'Unauthorized');
+        abort_if(!auth()->user()->can('moulds.delete'), 403, 'Unauthorized');
 
-        Mould::where('id', '=', $id, 'and')->delete();
+        Mould::findOrFail($id)->delete();
         session()->flash('success', 'Mould berhasil dihapus.');
         $this->resetForm();
     }

@@ -42,20 +42,23 @@ class StartRun extends Component
             'startNotes' => 'nullable|string|max:2000',
         ]);
 
-        $machineHasActive = ProductionRun::query()
-            ->where('machine_id', $this->startMachineId)
-            ->whereNull('end_ts')
-            ->exists();
-
-        if ($machineHasActive) {
-            $this->addError('startMachineId', 'Machine is already running another mould.');
-            return;
-        }
-
         DB::transaction(function () {
+            $machine = Machine::where('id', $this->startMachineId)->lockForUpdate()->firstOrFail();
+
+            $machineHasActive = ProductionRun::query()
+                ->where('machine_id', $machine->id)
+                ->whereNull('end_ts')
+                ->exists();
+
+            if ($machineHasActive) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'startMachineId' => 'Machine is already running another mould.'
+                ]);
+            }
+
             ProductionRun::create([
                 'mould_id' => $this->mould->id,
-                'machine_id' => $this->startMachineId,
+                'machine_id' => $machine->id,
                 'start_ts' => now(),
                 'end_ts' => null,
                 'cavities_snapshot' => (int) $this->mould->cavities,

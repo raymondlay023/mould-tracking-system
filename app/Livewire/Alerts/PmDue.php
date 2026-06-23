@@ -44,10 +44,7 @@ class PmDue extends Component
                 'me.plant_id as last_maint_plant_id',
             ]);
 
-        // subquery: total shot per mould (MVP)
-        $shotAgg = DB::table('production_runs as pr')
-            ->selectRaw('pr.mould_id, COALESCE(SUM(pr.shot_total),0) as total_shot')
-            ->groupBy('pr.mould_id');
+
 
         // current location (optional)
         $curLoc = DB::table('location_histories as lh')
@@ -62,7 +59,7 @@ class PmDue extends Component
 
         $rows = DB::table('moulds as m')
             ->leftJoinSub($maint, 'lastm', fn ($j) => $j->on('m.id', '=', 'lastm.mould_id'))
-            ->leftJoinSub($shotAgg, 'shots', fn ($j) => $j->on('m.id', '=', 'shots.mould_id'))
+
             ->leftJoinSub($curLoc, 'loc', fn ($j) => $j->on('m.id', '=', 'loc.mould_id'))
             ->leftJoin('machines as mc', 'loc.machine_id', '=', 'mc.id')
             ->leftJoin('zones as z', 'mc.zone_id', '=', 'z.id')
@@ -82,7 +79,7 @@ class PmDue extends Component
                 'lastm.next_due_date',
                 'lastm.next_due_shot',
 
-                DB::raw('COALESCE(shots.total_shot,0) as total_shot'),
+                DB::raw('COALESCE(m.total_shots,0) as total_shot'),
 
                 'loc.location as current_location',
                 'loc.start_ts as location_since',

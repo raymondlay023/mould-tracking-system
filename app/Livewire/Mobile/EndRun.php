@@ -20,7 +20,7 @@ class EndRun extends Component
 
     public function mount(ProductionRun $run): void
     {
-        abort_if(Gate::denies('close_runs'), 403);
+        abort_if(Gate::denies('runs.close'), 403);
         $this->run = $run->load(['mould', 'machine']);
 
         if ($this->run->end_ts) {
@@ -68,7 +68,7 @@ class EndRun extends Component
 
     public function save()
     {
-        abort_if(Gate::denies('close_runs'), 403);
+        abort_if(Gate::denies('runs.close'), 403);
 
         if ($this->run->end_ts) {
             session()->flash('error', 'Run is already closed.');
@@ -87,8 +87,11 @@ class EndRun extends Component
             session()->flash('success', 'Production Run ended successfully.');
             return redirect()->route('mobile.mould-detail', ['mould' => $this->run->mould_id]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
-            $this->addError('base', 'Error closing run: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error closing run: ' . $e->getMessage());
+            $this->addError('base', 'System error closing run. Please try again.');
         }
     }
 
