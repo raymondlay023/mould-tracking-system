@@ -66,7 +66,7 @@ class CheckPmDue extends Command
             ]);
 
             // Notify
-            $recipients = \App\Models\User::permission('view_maintenance_section')->get();
+            $recipients = \App\Models\User::permission('maintenance.view')->get();
             if ($recipients->count() > 0) {
                 // Determine reason (MVP: assumme shot based on common path, or check logic in action if exposed)
                 $reason = 'shot'; 

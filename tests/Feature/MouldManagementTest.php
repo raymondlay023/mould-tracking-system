@@ -123,7 +123,7 @@ class MouldManagementTest extends TestCase
         Livewire::test(\App\Livewire\Moulds\Index::class)
             ->call('delete', $mould->id);
 
-        $this->assertDatabaseMissing('moulds', [
+        $this->assertSoftDeleted('moulds', [
             'id' => $mould->id,
         ]);
     }
