@@ -99,6 +99,38 @@ class MaintenanceReport extends Component
         };
     }
 
+    public function getTopFailingChecks()
+    {
+        // Get all COMPLETED PM events in date range with checklist_data
+        $events = DB::table('maintenance_events')
+            ->where('type', 'PM')
+            ->where('status', 'COMPLETED')
+            ->whereNotNull('checklist_data')
+            ->whereDate('end_ts', '>=', $this->date_from)
+            ->whereDate('end_ts', '<=', $this->date_to)
+            ->get(['checklist_data']);
+
+        $failures = [];
+
+        foreach ($events as $event) {
+            $data = json_decode($event->checklist_data, true);
+            if (is_array($data)) {
+                foreach ($data as $item) {
+                    if (isset($item['status']) && $item['status'] === 'NG') {
+                        $task = $item['task'] ?? 'Unknown Task';
+                        if (!isset($failures[$task])) {
+                            $failures[$task] = 0;
+                        }
+                        $failures[$task]++;
+                    }
+                }
+            }
+        }
+
+        arsort($failures);
+        return array_slice($failures, 0, 5); // Top 5
+    }
+
     public function render()
     {
         $rows = $this->buildQuery()->get();
@@ -114,7 +146,8 @@ class MaintenanceReport extends Component
         $plants = Plant::orderBy('name')->get();
         $zones = Zone::orderBy('code')->get();
         $machines = Machine::with('plant', 'zone')->orderBy('code')->get();
+        $topFailingChecks = $this->getTopFailingChecks();
 
-        return view('livewire.reports.maintenance-report', compact('rows', 'kpi', 'plants', 'zones', 'machines'));
+        return view('livewire.reports.maintenance-report', compact('rows', 'kpi', 'plants', 'zones', 'machines', 'topFailingChecks'));
     }
 }

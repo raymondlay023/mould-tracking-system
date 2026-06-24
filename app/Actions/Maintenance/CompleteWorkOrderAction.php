@@ -18,33 +18,42 @@ class CompleteWorkOrderAction
     public function execute(MaintenanceEvent $event, array $data): MaintenanceEvent
     {
         return DB::transaction(function () use ($event, $data) {
+            $isPpm = $event->type === 'PM' && $event->pm_subtype === 'PPM';
+            
+            // Auto-Generate CM for NG items
+            $ngTasks = [];
+            if ($isPpm && is_array($event->checklist_data)) {
+                foreach ($event->checklist_data as $item) {
+                    if (isset($item['status']) && $item['status'] === 'NG') {
+                        $ngTasks[] = $item['task'] ?? 'Unknown Task';
+                    }
+                }
+            }
+
+            if (!empty($ngTasks)) {
+                MaintenanceEvent::create([
+                    'mould_id' => $event->mould_id,
+                    'type' => 'CM',
+                    'start_ts' => now(),
+                    'status' => 'REQUESTED',
+                    'machine_id' => $event->machine_id,
+                    'plant_id' => $event->plant_id,
+                    'description' => \Illuminate\Support\Str::limit('Auto-CM: Failed PPM checks - ' . implode(', ', $ngTasks), 255),
+                ]);
+            }
+
+            $newStatus = $isPpm ? 'IN_REVIEW' : 'COMPLETED';
+
             // Update Event
             $event->update([
-                'status' => 'COMPLETED',
+                'status' => $newStatus,
                 'end_ts' => now(), // Or provided date
-                'downtime_min' => $data['downtime_min'] ?? 0,
+                'downtime_min' => $data['downtime_min'],
                 'cost' => $data['cost'] ?? 0,
                 'parts_used' => $data['parts_used'] ?? null,
                 'performed_by' => $data['performed_by'] ?? auth()->user()?->name,
                 'notes' => $data['notes'] ?? null,
             ]);
-
-            // Update Mould Counters if it was a PM
-            if ($event->type === 'PM' && $event->pm_subtype === 'PPM') {
-                $mould = $event->mould;
-                
-                // PM Reset Logic:
-                // last_pm_at_shot = current total_shots
-                $mould->last_pm_at_shot = $mould->total_shots ?? 0;
-                $mould->last_pm_at_ts = now();
-                
-                // If mould was in IN_MAINTENANCE status, free it
-                if ($mould->status === \App\Enums\MouldStatus::IN_MAINTENANCE) {
-                    $mould->status = \App\Enums\MouldStatus::AVAILABLE;
-                }
-                
-                $mould->save();
-            }
 
             return $event;
         });

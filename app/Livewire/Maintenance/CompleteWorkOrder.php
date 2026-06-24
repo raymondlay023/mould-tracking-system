@@ -5,48 +5,65 @@ namespace App\Livewire\Maintenance;
 use App\Models\MaintenanceEvent;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class CompleteWorkOrder extends Component
 {
+    use WithFileUploads;
     public MaintenanceEvent $event;
     public array $checklist = [];
-    public $downtimeMin = 0;
+    public $downtimeMin;
     public $cost = null;
     public $partsUsed = null;
     public $notes = null;
+    public $photos = [];
+    public $isMobile = false;
 
     public function mount(MaintenanceEvent $event)
     {
         abort_if(Gate::denies('maintenance_events.create'), 403);
         $this->event = $event;
         $this->checklist = $event->checklist_data ?? [];
-        $this->downtimeMin = $event->downtime_min ?? 0;
+        $this->downtimeMin = $event->downtime_min === 0 ? null : $event->downtime_min;
+        $this->isMobile = request()->routeIs('mobile.*');
     }
 
     public function save()
     {
         abort_if(Gate::denies('maintenance_events.create'), 403);
 
-        $this->validate([
-            'checklist' => 'array',
-            'downtimeMin' => 'required|integer|min:0',
-            'cost' => 'nullable|numeric|min:0',
-            'partsUsed' => 'nullable|string',
-            'notes' => 'nullable|string',
-        ]);
+        try {
+            $this->validate([
+                'checklist' => 'array',
+                'downtimeMin' => 'required|integer|min:0',
+                'cost' => 'nullable|numeric|min:0',
+                'partsUsed' => 'nullable|string',
+                'notes' => 'nullable|string',
+                'photos.*' => 'nullable|image|max:5120', // 5MB max
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->dispatch('scrollToFirstError');
+            throw $e;
+        }
 
         if (!empty($this->checklist)) {
-            foreach ($this->checklist as $item) {
+            foreach ($this->checklist as $idx => $item) {
                 if ($this->event->pm_subtype === 'DAILY' || $this->event->pm_subtype === 'WEEKLY') {
                     // Allowed empty for now, just saving
                 } elseif ($this->event->pm_subtype === 'PPM') {
                     if (empty($item['status'])) {
                         $this->addError('checklist', 'You must provide a status for all checks.');
+                        $this->dispatch('scrollToFirstError');
                         return;
+                    }
+                    if ($item['status'] === 'NG' && isset($this->photos[$idx])) {
+                        $path = $this->photos[$idx]->store('maintenance_photos', 'public');
+                        $this->checklist[$idx]['photo_path'] = $path;
                     }
                 } else {
                     if (empty($item['completed'])) {
                         $this->addError('checklist', 'You must complete all checklist items before finishing.');
+                        $this->dispatch('scrollToFirstError');
                         return;
                     }
                 }
@@ -65,7 +82,7 @@ class CompleteWorkOrder extends Component
 
         session()->flash('success', 'Work Order Completed Successfully.');
 
-        if (request()->routeIs('mobile.*')) {
+        if ($this->isMobile) {
             return redirect()->route('mobile.dashboard');
         }
 
@@ -74,7 +91,7 @@ class CompleteWorkOrder extends Component
 
     public function render()
     {
-        if (request()->routeIs('mobile.*')) {
+        if ($this->isMobile) {
             return view('livewire.maintenance.complete-work-order')->layout('layouts.mobile');
         }
 

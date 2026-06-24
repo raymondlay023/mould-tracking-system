@@ -27,6 +27,7 @@ class WorkOrders extends Component
             'REQUESTED' => $events->where('status', '=', 'REQUESTED'),
             'APPROVED' => $events->where('status', '=', 'APPROVED'),
             'IN_PROGRESS' => $events->where('status', '=', 'IN_PROGRESS'),
+            'IN_REVIEW' => $events->where('status', '=', 'IN_REVIEW'),
         ];
         
         $moulds = \App\Models\Mould::orderBy('code', 'asc')->get();
@@ -108,4 +109,27 @@ class WorkOrders extends Component
         session()->flash('success', "Work on {$ev->mould->code} started.");
     }
 
+    public function signOff($id)
+    {
+        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
+
+        $ev = MaintenanceEvent::findOrFail($id);
+        
+        if ($ev->type === 'PM' && $ev->pm_subtype === 'PPM') {
+            $mould = $ev->mould;
+            // PM Reset Logic
+            $mould->last_pm_at_shot = $mould->total_shots ?? 0;
+            $mould->last_pm_at_ts = now();
+            
+            // If mould was in IN_MAINTENANCE status, free it
+            if ($mould->status === \App\Enums\MouldStatus::IN_MAINTENANCE) {
+                $mould->status = \App\Enums\MouldStatus::AVAILABLE;
+            }
+            $mould->save();
+        }
+
+        $ev->update(['status' => 'COMPLETED']);
+        
+        session()->flash('success', "Work on {$ev->mould->code} signed off and completed.");
+    }
 }

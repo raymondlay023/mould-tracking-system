@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         
         {{-- REQUESTED --}}
         <div class="bg-gray-50 rounded-2xl p-4 border border-gray-200/50">
@@ -96,6 +96,38 @@
                         <a href="{{ route('maintenance.work-orders.complete', $ev) }}" class="block text-center w-full py-2 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors">
                             Complete
                         </a>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- IN REVIEW --}}
+        <div class="bg-purple-50/50 rounded-2xl p-4 border border-purple-100/50">
+             <h3 class="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4 px-1 flex items-center justify-between">
+                <span>In Review</span>
+                <span class="bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full text-[10px]">{{ $cols['IN_REVIEW']->count() }}</span>
+            </h3>
+            <div class="space-y-3">
+                 @foreach($cols['IN_REVIEW'] as $ev)
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-purple-100 hover:shadow-md transition-all relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-purple-400"></div>
+                         <div class="flex justify-between items-start mb-2 pl-2">
+                            <div class="font-bold text-gray-900">{{ $ev->mould->code }}</div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-600">
+                                {{ $ev->type }}{{ $ev->pm_subtype ? ' - ' . $ev->pm_subtype : '' }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3 pl-2">{{ $ev->description }}</p>
+                        
+                        @can('admin_panel.view')
+                        <button wire:click="signOff('{{ $ev->id }}')" class="w-full py-2 bg-purple-600 text-white rounded-lg text-xs font-semibold hover:bg-purple-700 transition-colors">
+                            Sign Off & Complete
+                        </button>
+                        @else
+                        <div class="text-center text-xs text-gray-500 font-medium py-2">
+                            Awaiting Supervisor
+                        </div>
+                        @endcan
                     </div>
                 @endforeach
             </div>

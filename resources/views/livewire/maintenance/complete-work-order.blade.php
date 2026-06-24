@@ -17,7 +17,7 @@
     </div>
 
     <!-- Body -->
-    <div class="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full {{ request()->routeIs('mobile.*') ? 'pb-40' : 'pb-24' }}">
+    <div class="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full {{ $isMobile ? 'pb-40' : 'pb-24' }}">
         
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
             <h2 class="text-sm font-bold text-slate-800 mb-2">Job Details</h2>
@@ -27,22 +27,22 @@
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Downtime (Minutes)</label>
                     <input type="number" wire:model.defer="downtimeMin" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0">
-                    @error('downtimeMin') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                    @error('downtimeMin') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Cost Estimate (Optional)</label>
                     <input type="number" step="0.01" wire:model.defer="cost" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0.00">
-                    @error('cost') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                    @error('cost') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-sm font-bold text-slate-700 mb-1">Parts Used (Optional)</label>
                     <textarea wire:model.defer="partsUsed" rows="2" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="e.g. O-ring, Heater band"></textarea>
-                    @error('partsUsed') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                    @error('partsUsed') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-sm font-bold text-slate-700 mb-1">Completion Notes (Optional)</label>
                     <textarea wire:model.defer="notes" rows="2" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Additional details about the work performed..."></textarea>
-                    @error('notes') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                    @error('notes') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
             </div>
         </div>
@@ -51,7 +51,9 @@
             <div class="bg-white rounded-xl shadow-sm border border-blue-200 p-4 mb-6">
                 <h3 class="font-bold text-blue-900 text-base mb-4">Maintenance Checklist</h3>
                 @error('checklist')
-                    <div class="text-xs text-red-600 bg-red-50 p-2 rounded mb-4">{{ $message }}</div>
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 font-bold error-scroll-target">
+                        {{ $message }}
+                    </div>
                 @enderror
 
                 @if(in_array($event->pm_subtype, ['DAILY', 'WEEKLY']))
@@ -119,14 +121,57 @@
                                                 {{ $item['standard_value'] ?? '' }}
                                             </td>
                                             <td class="p-3 align-top">
-                                                <select wire:model="checklist.{{ $idx }}.status" class="w-full text-sm rounded-md border-slate-300 py-2 pl-3 pr-8 focus:ring-blue-500 focus:border-blue-500 font-medium">
-                                                    <option value="">--</option>
-                                                    <option value="OK" class="text-green-600 font-bold">OK</option>
-                                                    <option value="NG" class="text-red-600 font-bold">NG</option>
-                                                </select>
+                                                <div class="flex items-center gap-2">
+                                                    <button type="button" 
+                                                        wire:click="$set('checklist.{{ $idx }}.status', 'OK')"
+                                                        class="flex-1 py-2 px-3 rounded-md text-sm font-bold transition-colors border {{ (isset($checklist[$idx]['status']) && $checklist[$idx]['status'] === 'OK') ? 'bg-green-100 border-green-500 text-green-700 shadow-inner' : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-50' }}">
+                                                        OK
+                                                    </button>
+                                                    <button type="button" 
+                                                        wire:click="$set('checklist.{{ $idx }}.status', 'NG')"
+                                                        class="flex-1 py-2 px-3 rounded-md text-sm font-bold transition-colors border {{ (isset($checklist[$idx]['status']) && $checklist[$idx]['status'] === 'NG') ? 'bg-red-100 border-red-500 text-red-700 shadow-inner' : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-50' }}">
+                                                        NG
+                                                    </button>
+                                                </div>
                                             </td>
                                             <td class="p-3 align-top">
-                                                <input type="text" wire:model="checklist.{{ $idx }}.remark" class="w-full text-sm rounded-md border-slate-200 p-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add note...">
+                                                <input type="text" wire:model.defer="checklist.{{ $idx }}.remark" class="w-full text-sm rounded-md border-slate-200 p-2 focus:ring-blue-500 focus:border-blue-500 mb-2" placeholder="Add note...">
+                                                
+                                                @if(isset($checklist[$idx]['status']) && $checklist[$idx]['status'] === 'NG')
+                                                    @php
+                                                        $hasPhoto = isset($photos[$idx]);
+                                                    @endphp
+                                                    <div class="mt-2 p-2 rounded-lg border relative transition-colors {{ $hasPhoto ? 'bg-green-50 border-green-300' : 'bg-red-50 border-dashed border-red-300' }}">
+                                                        <div class="flex items-center justify-between mb-1">
+                                                            <label class="block text-xs font-bold {{ $hasPhoto ? 'text-green-700' : 'text-red-700' }}">
+                                                                @if($hasPhoto)
+                                                                    <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Evidence Attached</span>
+                                                                @else
+                                                                    Photo Evidence Required
+                                                                @endif
+                                                            </label>
+                                                            @if($hasPhoto)
+                                                                <label class="text-[10px] text-blue-600 hover:underline cursor-pointer font-bold uppercase tracking-wider">
+                                                                    Replace
+                                                                    <input type="file" wire:model="photos.{{ $idx }}" accept="image/*" class="hidden">
+                                                                </label>
+                                                            @endif
+                                                        </div>
+                                                        
+                                                        @if($hasPhoto && is_object($photos[$idx]) && method_exists($photos[$idx], 'temporaryUrl'))
+                                                            <div class="mt-2 mb-1">
+                                                                <img src="{{ $photos[$idx]->temporaryUrl() }}" class="h-16 w-16 object-cover rounded-md border border-green-200 shadow-sm" alt="Evidence Preview">
+                                                            </div>
+                                                        @endif
+                                                        
+                                                        @if(!$hasPhoto)
+                                                            <input type="file" wire:model="photos.{{ $idx }}" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-100 file:text-red-700 hover:file:bg-red-200">
+                                                        @endif
+                                                        
+                                                        <div wire:loading wire:target="photos.{{ $idx }}" class="text-xs text-blue-600 mt-1 font-medium">Uploading...</div>
+                                                        @error('photos.'.$idx) <span class="text-xs text-red-600 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
+                                                    </div>
+                                                @endif
                                             </td>
                                         </tr>
                                         @endforeach
@@ -156,8 +201,8 @@
     </div>
 
     <!-- Sticky Footer -->
-    <div class="fixed {{ request()->routeIs('mobile.*') ? 'bottom-16' : 'bottom-0' }} left-0 w-full bg-white border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex justify-end gap-3">
-        @if(request()->routeIs('mobile.*'))
+    <div class="fixed {{ $isMobile ? 'bottom-16' : 'bottom-0' }} left-0 w-full bg-white border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 flex justify-end gap-3">
+        @if($isMobile)
             <a href="{{ route('mobile.mould-detail', $event->mould_id) }}" class="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold bg-white hover:bg-slate-50 transition-colors text-center">
                 Cancel
             </a>
@@ -171,4 +216,17 @@
             <span wire:loading wire:target="save">Saving...</span>
         </button>
     </div>
+
+    @script
+    <script>
+        $wire.on('scrollToFirstError', () => {
+            setTimeout(() => {
+                const firstError = document.querySelector('.error-scroll-target');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 50);
+        });
+    </script>
+    @endscript
 </div>
