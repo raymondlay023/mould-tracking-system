@@ -11,6 +11,9 @@ class CompleteWorkOrder extends Component
     public MaintenanceEvent $event;
     public array $checklist = [];
     public $downtimeMin = 0;
+    public $cost = null;
+    public $partsUsed = null;
+    public $notes = null;
 
     public function mount(MaintenanceEvent $event)
     {
@@ -27,6 +30,9 @@ class CompleteWorkOrder extends Component
         $this->validate([
             'checklist' => 'array',
             'downtimeMin' => 'required|integer|min:0',
+            'cost' => 'nullable|numeric|min:0',
+            'partsUsed' => 'nullable|string',
+            'notes' => 'nullable|string',
         ]);
 
         if (!empty($this->checklist)) {
@@ -50,7 +56,12 @@ class CompleteWorkOrder extends Component
         $this->event->checklist_data = $this->checklist;
         $this->event->save();
 
-        app(\App\Actions\Maintenance\CompleteWorkOrderAction::class)->execute($this->event->id, $this->downtimeMin);
+        app(\App\Actions\Maintenance\CompleteWorkOrderAction::class)->execute($this->event, [
+            'downtime_min' => $this->downtimeMin,
+            'cost' => $this->cost,
+            'parts_used' => $this->partsUsed,
+            'notes' => $this->notes,
+        ]);
 
         session()->flash('success', 'Work Order Completed Successfully.');
 

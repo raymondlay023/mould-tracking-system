@@ -23,10 +23,27 @@
             <h2 class="text-sm font-bold text-slate-800 mb-2">Job Details</h2>
             <p class="text-sm text-slate-600 mb-4">{{ $event->description }}</p>
             
-            <div>
-                <label class="block text-sm font-bold text-slate-700 mb-1">Downtime (Minutes)</label>
-                <input type="number" wire:model.defer="downtimeMin" class="w-full md:w-1/3 rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm">
-                @error('downtimeMin') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Downtime (Minutes)</label>
+                    <input type="number" wire:model.defer="downtimeMin" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0">
+                    @error('downtimeMin') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Cost Estimate (Optional)</label>
+                    <input type="number" step="0.01" wire:model.defer="cost" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0.00">
+                    @error('cost') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Parts Used (Optional)</label>
+                    <textarea wire:model.defer="partsUsed" rows="2" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="e.g. O-ring, Heater band"></textarea>
+                    @error('partsUsed') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-bold text-slate-700 mb-1">Completion Notes (Optional)</label>
+                    <textarea wire:model.defer="notes" rows="2" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Additional details about the work performed..."></textarea>
+                    @error('notes') <span class="text-xs text-red-500 block mt-1">{{ $message }}</span> @enderror
+                </div>
             </div>
         </div>
 
