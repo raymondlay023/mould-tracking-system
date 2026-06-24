@@ -4,12 +4,6 @@
             <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 tracking-tight">Maintenance Log</h1>
             <p class="text-gray-500 mt-1">Track and manage preventative & corrective actions</p>
         </div>
-
-        <button type="button" wire:click="createNew"
-            class="group flex items-center gap-2 px-5 py-2.5 rounded-full bg-gray-900 text-white text-sm font-medium shadow-lg shadow-gray-200 hover:shadow-xl hover:bg-black transition-all transform hover:-translate-y-0.5">
-            <svg class="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-            <span>New Entry</span>
-        </button>
     </div>
 
     @if (session('success'))
@@ -22,6 +16,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {{-- FORM --}}
+        @if($idEdit && auth()->user()->can('admin_panel.view'))
         <div class="lg:col-span-1">
             <div class="bg-white/80 backdrop-blur-xl shadow-sm rounded-3xl border border-white/50 p-6 sticky top-24">
                 <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
@@ -123,9 +118,10 @@
                 </div>
             </div>
         </div>
+        @endif
 
         {{-- TIMELINE FEED --}}
-        <div class="lg:col-span-2">
+        <div class="{{ ($idEdit && auth()->user()->can('admin_panel.view')) ? 'lg:col-span-2' : 'lg:col-span-3' }}">
             <div class="bg-white/80 backdrop-blur-xl shadow-sm rounded-3xl border border-white/50 flex flex-col h-full">
                 {{-- Search Bar --}}
                 <div class="p-4 border-b border-gray-100 bg-white/40 rounded-t-3xl sticky top-0 z-10 backdrop-blur-md">
@@ -206,12 +202,14 @@
                                             Completed {{ \Carbon\Carbon::parse($e->end_ts)->diffForHumans() }}
                                         </div>
                                         <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button wire:click="edit('{{ $e->id }}')" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Edit">
-                                                Edit
-                                            </button>
-                                            <button wire:click="delete('{{ $e->id }}')" onclick="return confirm('Delete this maintenance record?')" class="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Delete">
-                                                Delete
-                                            </button>
+                                            @can('admin_panel.view')
+                                                <button wire:click="edit('{{ $e->id }}')" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors" title="Edit">
+                                                    Edit
+                                                </button>
+                                                <button wire:click="delete('{{ $e->id }}')" onclick="return confirm('Delete this maintenance record?')" class="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors" title="Delete">
+                                                    Delete
+                                                </button>
+                                            @endcan
                                         </div>
                                     </div>
                                 </div>

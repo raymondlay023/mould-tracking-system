@@ -110,13 +110,10 @@ class Index extends Component
         ];
     }
 
-    public function createNew(): void
-    {
-        $this->resetForm();
-    }
-
     public function edit(string $id): void
     {
+        abort_if(auth()->user()->cannot('admin_panel.view'), 403);
+
         $e = MaintenanceEvent::findOrFail($id);
         $this->idEdit = $e->id;
         $this->mould_id = $e->mould_id;
@@ -139,64 +136,39 @@ class Index extends Component
 
     public function save(): void
     {
-        // Security Check
-        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403, 'Unauthorized');
+        abort_if(!$this->idEdit, 403, 'Creation from this form is disabled.');
+        abort_if(auth()->user()->cannot('admin_panel.view'), 403);
 
-        $v = $this->validate();
+        $this->validate();
 
-        $loc = \App\Models\LocationHistory::query()
-            ->where('mould_id', '=', $this->mould_id)
-            ->whereNull('end_ts')
-            ->first();
+        $event = MaintenanceEvent::findOrFail($this->idEdit);
 
-        $autoMachineId = null;
-        $autoPlantId = null;
+        $event->update([
+            'mould_id' => $this->mould_id,
+            'type' => $this->type,
+            'description' => $this->description,
+            'start_ts' => $this->toUtc($this->start_ts),
+            'end_ts' => $this->toUtc($this->end_ts),
+            'downtime_min' => $this->downtime_min ?: 0,
+            'cost' => $this->cost,
+            'parts_used' => $this->parts_used,
+            'next_due_shot' => $this->next_due_shot,
+            'next_due_date' => $this->next_due_date,
+            'performed_by' => $this->performed_by,
+            'notes' => $this->notes,
+        ]);
 
-        if ($loc) {
-            $autoPlantId = $loc->plant_id;
-            if ($loc->location === 'MACHINE') {
-                $autoMachineId = $loc->machine_id;
-            }
-        }
-
-        // Always COMPLETED for Log
-        $startTs = $this->toUtc($this->start_ts);
-        $endTs = $this->toUtc($this->end_ts);
-
-        MaintenanceEvent::updateOrCreate(
-            ['id' => $this->idEdit],
-            [
-                'mould_id' => $this->mould_id,
-                'start_ts' => $startTs,
-                'type' => $this->type,
-                'description' => $this->description,
-                'next_due_shot' => $this->next_due_shot,
-                'next_due_date' => $this->next_due_date ?: null,
-                'performed_by' => $this->performed_by ?: (auth()->user()?->name),
-                'notes' => $this->notes,
-                'machine_id' => $autoMachineId,
-                'plant_id' => $autoPlantId,
-                
-                'status' => 'COMPLETED',
-                'end_ts' => $endTs,
-                'downtime_min' => $this->downtime_min,
-                'parts_used' => $this->parts_used,
-                'cost' => $this->cost,
-            ]
-        );
-
-        session()->flash('success', $this->idEdit ? 'Maintenance updated.' : 'Maintenance logged.');
-        $this->createNew();
+        session()->flash('success', 'Maintenance event updated successfully.');
+        $this->resetForm();
     }
 
     public function delete(string $id): void
     {
-        // Security Check
-        abort_if(Gate::denies('maintenance_events.delete'), 403, 'Unauthorized');
-
-        MaintenanceEvent::where('id', '=', $id, 'and')->delete();
+        abort_if(auth()->user()->cannot('admin_panel.view'), 403);
+        
+        MaintenanceEvent::where('id', '=', $id)->delete();
         session()->flash('success', 'Maintenance deleted.');
-        $this->createNew();
+        $this->resetForm();
     }
 
     public function render()
