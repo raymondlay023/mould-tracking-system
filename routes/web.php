@@ -72,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/maintenance-tasks', \App\Livewire\Mobile\MaintenanceTasks::class)->name('maintenance-tasks');
         Route::get('/jobs/{event}/complete', \App\Livewire\Maintenance\CompleteWorkOrder::class)->name('jobs.complete');
         Route::get('/runs/{run}/end', \App\Livewire\Mobile\EndRun::class)->name('runs.end');
+        Route::get('/history', \App\Livewire\Mobile\History::class)->name('history');
         Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     });
 
