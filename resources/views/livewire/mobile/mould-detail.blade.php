@@ -77,7 +77,9 @@
                             <span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold {{ $wo->status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' : ($wo->status === 'REQUESTED' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700') }}">
                                 {{ str_replace('_', ' ', $wo->status) }}
                             </span>
-                            <div class="font-bold text-slate-900 mt-2">{{ $wo->type }} Work Order</div>
+                            <div class="font-bold text-slate-900 mt-2">
+                                {{ $wo->type }}{{ $wo->pm_subtype ? ' - ' . $wo->pm_subtype : '' }} Work Order
+                            </div>
                             <div class="text-xs text-slate-500 mt-1">{{ $wo->description }}</div>
                         </div>
                     </div>
@@ -87,9 +89,9 @@
                             Start Work Now
                         </button>
                     @elseif($wo->status === 'IN_PROGRESS')
-                        <button type="button" wire:click="openCompleteModal('{{ $wo->id }}')" class="w-full bg-green-600 text-white py-3 rounded-lg font-bold shadow-sm active:scale-95 transition-transform text-sm">
+                        <a href="{{ route('mobile.jobs.complete', $wo) }}" class="block w-full text-center bg-green-600 text-white py-3 rounded-lg font-bold shadow-sm active:scale-95 transition-transform text-sm">
                             Complete Work Order
-                        </button>
+                        </a>
                     @endif
                 </div>
             @endforeach
@@ -125,64 +127,35 @@
             <div class="p-4 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Type</label>
-                    <select wire:model="maintenanceType" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                    <select wire:model.live="maintenanceType" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
                         <option value="CM">Corrective (CM)</option>
                         <option value="PM">Preventive (PM)</option>
                     </select>
                     @error('maintenanceType') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
+                @if($maintenanceType === 'PM')
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                    <textarea wire:model="maintenanceDescription" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Describe the issue or work needed..."></textarea>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">PM Subtype</label>
+                    <select wire:model.defer="maintenancePmSubtype" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
+                        <option value="">Select Subtype (Optional)</option>
+                        <option value="DAILY">Daily Maintenance</option>
+                        <option value="WEEKLY">Weekly Maintenance</option>
+                        <option value="PPM">PPM / Overhaul</option>
+                    </select>
+                    @error('maintenancePmSubtype') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
+                </div>
+                @endif
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">
+                        Description @if($maintenanceType === 'PM') <span class="text-slate-400 font-normal">(Optional)</span> @endif
+                    </label>
+                    <textarea wire:model="maintenanceDescription" rows="3" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="{{ $maintenanceType === 'PM' ? 'Optional description...' : 'Describe the issue or work needed...' }}"></textarea>
                     @error('maintenanceDescription') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
             </div>
             <div class="p-4 border-t border-slate-100 flex gap-2">
                 <button wire:click="$set('showMaintenanceModal', false)" class="flex-1 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium text-sm">Cancel</button>
                 <button wire:click="submitMaintenance" class="flex-1 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm">Submit</button>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    {{-- Complete Maintenance Modal --}}
-    @if($showCompleteModal)
-    <div class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden">
-            <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-bold text-slate-900">Complete Work Order</h3>
-                <button wire:click="$set('showCompleteModal', false)" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <div class="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Downtime (Minutes)</label>
-                    <input type="number" wire:model="downtime_min" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500">
-                    @error('downtime_min') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Parts Used (Optional)</label>
-                    <input type="text" wire:model="parts_used" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="e.g. O-ring, Heater band">
-                    @error('parts_used') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Cost $ (Optional)</label>
-                    <input type="number" step="0.01" wire:model="cost" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
-                    @error('cost') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Notes</label>
-                    <textarea wire:model="notes" rows="2" class="w-full rounded-lg border-slate-300 text-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Completion details..."></textarea>
-                    @error('notes') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
-                </div>
-            </div>
-            <div class="p-4 border-t border-slate-100 flex gap-2">
-                <button wire:click="$set('showCompleteModal', false)" class="flex-1 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium text-sm">Cancel</button>
-                <button wire:click="submitWorkOrderCompletion" class="flex-1 py-2 bg-green-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    Finish Job
-                </button>
             </div>
         </div>
     </div>

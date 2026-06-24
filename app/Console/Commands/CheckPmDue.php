@@ -44,7 +44,8 @@ class CheckPmDue extends Command
             // If 'end_ts' is null, it's active.
             
             $activePm = \App\Models\MaintenanceEvent::where('mould_id', '=', $mould->id)
-                ->where('type', '=', 'PM') // Assuming 'PM' is valid type
+                ->where('type', '=', 'PM') 
+                ->where('pm_subtype', '=', 'PPM')
                 ->whereNull('end_ts')
                 ->exists();
 
@@ -57,6 +58,7 @@ class CheckPmDue extends Command
             \App\Models\MaintenanceEvent::create([
                 'mould_id' => $mould->id,
                 'type' => 'PM',
+                'pm_subtype' => 'PPM',
                 'status' => 'REQUESTED',
                 'start_ts' => now(), // Ticket created time
                 'end_ts' => null,    // Remains open

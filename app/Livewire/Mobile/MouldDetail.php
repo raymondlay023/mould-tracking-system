@@ -15,15 +15,8 @@ class MouldDetail extends Component
     // Create Maintenance Modal
     public bool $showMaintenanceModal = false;
     public string $maintenanceType = 'CM';
+    public ?string $maintenancePmSubtype = null;
     public string $maintenanceDescription = '';
-
-    // Complete Maintenance Modal
-    public bool $showCompleteModal = false;
-    public ?string $completingWorkOrderId = null;
-    public int $downtime_min = 0;
-    public ?int $cost = null;
-    public ?string $parts_used = null;
-    public ?string $notes = null;
 
     public function mount(Mould $mould)
     {
@@ -53,8 +46,7 @@ class MouldDetail extends Component
 
     public function openMaintenanceModal()
     {
-        $this->maintenanceType = 'CM';
-        $this->maintenanceDescription = '';
+        $this->reset(['showMaintenanceModal', 'maintenanceType', 'maintenancePmSubtype', 'maintenanceDescription']);
         $this->showMaintenanceModal = true;
     }
 
@@ -63,14 +55,16 @@ class MouldDetail extends Component
         abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
 
         $this->validate([
-            'maintenanceType' => 'required|in:PM,CM',
-            'maintenanceDescription' => 'required|string|max:255',
+            'maintenanceType' => 'required|in:CM,PM',
+            'maintenancePmSubtype' => 'nullable|in:DAILY,WEEKLY,PPM',
+            'maintenanceDescription' => 'required_if:maintenanceType,CM|nullable|string|max:500'
         ]);
 
         \App\Models\MaintenanceEvent::create([
             'mould_id' => $this->mould->id,
             'type' => $this->maintenanceType,
-            'description' => $this->maintenanceDescription,
+            'pm_subtype' => $this->maintenanceType === 'PM' ? $this->maintenancePmSubtype : null,
+            'description' => $this->maintenanceDescription ?: ($this->maintenancePmSubtype ? $this->maintenancePmSubtype . ' Maintenance' : 'Preventive Maintenance'),
             'start_ts' => now(),
             'status' => 'REQUESTED',
         ]);
@@ -95,41 +89,6 @@ class MouldDetail extends Component
         
         $this->refreshActiveRun();
         session()->flash('success', "Work on {$this->mould->code} started.");
-    }
-
-    public function openCompleteModal($id)
-    {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
-        
-        $this->completingWorkOrderId = $id;
-        $this->downtime_min = 0;
-        $this->cost = null;
-        $this->parts_used = null;
-        $this->notes = null;
-        $this->showCompleteModal = true;
-    }
-
-    public function submitWorkOrderCompletion(\App\Actions\Maintenance\CompleteWorkOrderAction $action)
-    {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
-
-        $this->validate([
-            'downtime_min' => 'required|integer|min:0',
-        ]);
-
-        $ev = \App\Models\MaintenanceEvent::findOrFail($this->completingWorkOrderId);
-
-        $action->execute($ev, [
-            'downtime_min' => $this->downtime_min,
-            'cost' => $this->cost,
-            'parts_used' => $this->parts_used,
-            'notes' => $this->notes,
-        ]);
-
-        $this->showCompleteModal = false;
-        $this->completingWorkOrderId = null;
-        $this->refreshActiveRun();
-        session()->flash('success', 'Work Order completed successfully.');
     }
 
     public function render()

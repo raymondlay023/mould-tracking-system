@@ -8,19 +8,11 @@ use Livewire\Component;
 
 class WorkOrders extends Component
 {
-    // ID of event being completed (for modal)
-    public ?string $completingId = null;
-
-    // Form data for completion
-    public int $downtime_min = 0;
-    public ?int $cost = null;
-    public ?string $parts_used = null;
-    public ?string $notes = null;
-
     // Creation State
     public bool $creating = false;
     public string $newMouldId = '';
     public string $newType = 'CM'; // Corrective by default for requests
+    public ?string $newPmSubtype = null;
     public string $newDescription = '';
     public string $newStartTs = '';
 
@@ -44,7 +36,7 @@ class WorkOrders extends Component
 
     public function create()
     {
-        $this->reset(['newMouldId', 'newDescription']);
+        $this->reset(['newMouldId', 'newDescription', 'newPmSubtype']);
         $this->newType = 'CM';
         
         $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
@@ -65,8 +57,9 @@ class WorkOrders extends Component
         $this->validate([
             'newMouldId' => 'required|exists:moulds,id',
             'newType' => 'required|in:PM,CM',
+            'newPmSubtype' => 'nullable|in:DAILY,WEEKLY,PPM',
             'newStartTs' => 'required|date',
-            'newDescription' => 'required|string|max:255',
+            'newDescription' => 'required_if:newType,CM|nullable|string|max:255',
         ]);
         
         $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
@@ -75,7 +68,8 @@ class WorkOrders extends Component
         MaintenanceEvent::create([
             'mould_id' => $this->newMouldId,
             'type' => $this->newType,
-            'description' => $this->newDescription,
+            'pm_subtype' => $this->newType === 'PM' ? $this->newPmSubtype : null,
+            'description' => $this->newDescription ?: ($this->newPmSubtype ? $this->newPmSubtype . ' Maintenance' : 'Preventive Maintenance'),
             'start_ts' => $utcStart,
             'status' => 'REQUESTED',
             'planted_id' => null, // Will be filled when scheduled/completed if needed? Actually mostly null for requests.
@@ -114,38 +108,4 @@ class WorkOrders extends Component
         session()->flash('success', "Work on {$ev->mould->code} started.");
     }
 
-    // Open Modal
-    public function initiateCompletion($id)
-    {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
-
-        $this->completingId = $id;
-        $this->reset(['downtime_min', 'cost', 'parts_used', 'notes']);
-    }
-
-    public function complete(CompleteWorkOrderAction $action)
-    {
-        abort_if(\Illuminate\Support\Facades\Gate::denies('maintenance_events.create'), 403);
-
-        $this->validate([
-            'downtime_min' => 'required|integer|min:0',
-        ]);
-
-        $ev = MaintenanceEvent::findOrFail($this->completingId);
-
-        $action->execute($ev, [
-            'downtime_min' => $this->downtime_min,
-            'cost' => $this->cost,
-            'parts_used' => $this->parts_used,
-            'notes' => $this->notes,
-        ]);
-
-        $this->completingId = null;
-        session()->flash('success', 'Work Order completed successfully.');
-    }
-    
-    public function cancelCompletion()
-    {
-        $this->completingId = null;
-    }
 }

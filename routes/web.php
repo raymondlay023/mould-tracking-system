@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/moulds/{mould}/start-run', \App\Livewire\Mobile\StartRun::class)->name('runs.start');
         Route::get('/moulds/{mould}/move', \App\Livewire\Mobile\MoveMould::class)->name('moulds.move');
         Route::get('/jobs', \App\Livewire\Mobile\Jobs::class)->name('jobs');
+        Route::get('/jobs/{event}/complete', \App\Livewire\Maintenance\CompleteWorkOrder::class)->name('jobs.complete');
         Route::get('/runs/{run}/end', \App\Livewire\Mobile\EndRun::class)->name('runs.end');
         Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
     });
@@ -91,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Maintenance feature (CRUD event)
         Route::get('/maintenance/work-orders', \App\Livewire\Maintenance\WorkOrders::class)->name('maintenance.work-orders');
+        Route::get('/maintenance/work-orders/{event}/complete', \App\Livewire\Maintenance\CompleteWorkOrder::class)->name('maintenance.work-orders.complete');
         Route::get('/maintenance/events', MaintenanceIndex::class)->name('maintenance.index');
 
         // Location move

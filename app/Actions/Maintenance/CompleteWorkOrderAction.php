@@ -30,7 +30,7 @@ class CompleteWorkOrderAction
             ]);
 
             // Update Mould Counters if it was a PM
-            if ($event->type === 'PM') {
+            if ($event->type === 'PM' && $event->pm_subtype === 'PPM') {
                 $mould = $event->mould;
                 
                 // PM Reset Logic:
