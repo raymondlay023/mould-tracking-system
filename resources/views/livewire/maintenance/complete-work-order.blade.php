@@ -19,6 +19,14 @@
     <!-- Body -->
     <div class="flex-1 overflow-y-auto p-4 max-w-5xl mx-auto w-full {{ $isMobile ? 'pb-40' : 'pb-24' }}">
         
+        <div wire:offline class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 shadow-sm flex items-start gap-3">
+            <svg class="w-6 h-6 shrink-0 mt-0.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.163a1 1 0 111.414 1.414M3 3l18 18"></path></svg>
+            <div>
+                <h3 class="font-bold text-sm">You are offline</h3>
+                <p class="text-xs mt-1">Changes cannot be saved and photos cannot be uploaded until you regain connection. Please wait.</p>
+            </div>
+        </div>
+
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
             <h2 class="text-sm font-bold text-slate-800 mb-2">Job Details</h2>
             <p class="text-sm text-slate-600 mb-4">{{ $event->description }}</p>
@@ -26,21 +34,27 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Downtime (Minutes)</label>
-                    <input type="number" wire:model.defer="downtimeMin" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0">
+                    <input type="text" inputmode="numeric" pattern="[0-9]*" wire:model.defer="downtimeMin" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0">
                     @error('downtimeMin') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">Cost Estimate (Optional)</label>
-                    <input type="number" step="0.01" wire:model.defer="cost" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0.00">
+                    <input type="text" inputmode="decimal" wire:model.defer="cost" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="0.00">
                     @error('cost') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Parts Used (Optional)</label>
+                    <label class="flex items-center justify-between text-sm font-bold text-slate-700 mb-1">
+                        Parts Used (Optional)
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Use voice dictation"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    </label>
                     <textarea wire:model.defer="partsUsed" rows="2" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="e.g. O-ring, Heater band"></textarea>
                     @error('partsUsed') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-bold text-slate-700 mb-1">Completion Notes (Optional)</label>
+                    <label class="flex items-center justify-between text-sm font-bold text-slate-700 mb-1">
+                        Completion Notes (Optional)
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" title="Use voice dictation"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+                    </label>
                     <textarea wire:model.defer="notes" rows="2" class="w-full rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-sm" placeholder="Additional details about the work performed..."></textarea>
                     @error('notes') <span class="text-xs text-red-500 block mt-1 error-scroll-target">{{ $message }}</span> @enderror
                 </div>
@@ -72,10 +86,16 @@
                                 <tr class="hover:bg-slate-50 transition-colors">
                                     <td class="p-3 font-medium">{{ $item['task'] ?? '' }}</td>
                                     <td class="p-3 text-center">
-                                        <input type="checkbox" wire:model="checklist.{{ $index }}.cleaning" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" wire:model="checklist.{{ $index }}.cleaning" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
                                     </td>
                                     <td class="p-3 text-center">
-                                        <input type="checkbox" wire:model="checklist.{{ $index }}.lubricate" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" wire:model="checklist.{{ $index }}.lubricate" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                        </label>
                                     </td>
                                     <td class="p-3">
                                         <input type="text" wire:model="checklist.{{ $index }}.remark" class="w-full text-sm rounded-md border-slate-200 p-2 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-300" placeholder="Optional remark...">
@@ -153,7 +173,7 @@
                                                             @if($hasPhoto)
                                                                 <label class="text-[10px] text-blue-600 hover:underline cursor-pointer font-bold uppercase tracking-wider">
                                                                     Replace
-                                                                    <input type="file" wire:model="photos.{{ $idx }}" accept="image/*" class="hidden">
+                                                                    <input type="file" wire:model="photos.{{ $idx }}" accept="image/*" capture="environment" class="hidden">
                                                                 </label>
                                                             @endif
                                                         </div>
@@ -165,7 +185,7 @@
                                                         @endif
                                                         
                                                         @if(!$hasPhoto)
-                                                            <input type="file" wire:model="photos.{{ $idx }}" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-100 file:text-red-700 hover:file:bg-red-200">
+                                                            <input type="file" wire:model="photos.{{ $idx }}" accept="image/*" capture="environment" class="w-full text-xs text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-red-100 file:text-red-700 hover:file:bg-red-200">
                                                         @endif
                                                         
                                                         <div wire:loading wire:target="photos.{{ $idx }}" class="text-xs text-blue-600 mt-1 font-medium">Uploading...</div>
@@ -183,15 +203,16 @@
 
                 @else
                     {{-- Legacy / Basic PM --}}
-                    <div class="space-y-2">
+                    <div class="space-y-3">
                         @foreach($checklist as $index => $item)
-                            <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors bg-white shadow-sm">
-                                <div class="flex-shrink-0 mt-0.5">
-                                    <input type="checkbox" wire:model="checklist.{{ $index }}.completed" class="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                </div>
-                                <span class="text-sm font-medium text-slate-700 leading-snug {{ !empty($item['completed']) ? 'line-through text-slate-400' : '' }}">
+                            <label class="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors bg-white shadow-sm">
+                                <span class="text-sm font-medium text-slate-700 leading-snug {{ !empty($item['completed']) ? 'line-through text-slate-400' : '' }} mr-4">
                                     {{ $item['task'] }}
                                 </span>
+                                <div class="relative inline-flex items-center shrink-0">
+                                    <input type="checkbox" wire:model="checklist.{{ $index }}.completed" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                </div>
                             </label>
                         @endforeach
                     </div>
