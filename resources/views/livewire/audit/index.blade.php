@@ -45,8 +45,12 @@
                                         @if(isset($l->properties['old'][$key]) && $l->properties['old'][$key] != $val)
                                             <div class="flex gap-2 text-xs">
                                                 <span class="text-gray-500 w-24 text-right">{{ $key }}:</span>
-                                                <span class="text-red-500 line-through">{{ $l->properties['old'][$key] }}</span>
-                                                <span class="text-green-600">-> {{ $val }}</span>
+                                                <span class="text-red-500 line-through truncate w-32" title="{{ is_array($l->properties['old'][$key]) ? json_encode($l->properties['old'][$key]) : $l->properties['old'][$key] }}">
+                                                    {{ is_array($l->properties['old'][$key]) ? json_encode($l->properties['old'][$key]) : $l->properties['old'][$key] }}
+                                                </span>
+                                                <span class="text-green-600 truncate w-32" title="{{ is_array($val) ? json_encode($val) : $val }}">
+                                                    -> {{ is_array($val) ? json_encode($val) : $val }}
+                                                </span>
                                             </div>
                                         @endif
                                     @endforeach
