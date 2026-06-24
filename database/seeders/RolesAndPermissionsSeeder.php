@@ -57,6 +57,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::ViewProductionSection->value,
                 PermissionEnum::ViewQaSection->value,
                 PermissionEnum::AccessOperations->value,
+                PermissionEnum::ViewReports->value,
                 PermissionEnum::ManageTrials->value,
                 PermissionEnum::ManageSetups->value,
                 PermissionEnum::CloseRuns->value,
@@ -70,6 +71,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::ViewMaintenanceSection->value,
                 PermissionEnum::ViewQaSection->value,
                 PermissionEnum::AccessOperations->value,
+                PermissionEnum::ViewReports->value,
                 PermissionEnum::ManageMachines->value,
             ],
         ];

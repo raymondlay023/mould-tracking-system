@@ -17,6 +17,7 @@ enum Permission: string
     // General / Dashboard
     case ViewMainDashboard       = 'dashboard.view';
     case AccessOperations        = 'operations.access';
+    case ViewReports             = 'reports.view';
 
     // Production
     case ViewProductionSection   = 'production.view';

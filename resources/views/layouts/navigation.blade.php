@@ -57,39 +57,44 @@
                     {{ __('Moulds Registry') }}
                 </x-sidebar-link>
 
-                <x-sidebar-link :href="route('runs.active')" :active="request()->routeIs('runs.*')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                        </svg>
-                    </x-slot>
-                    <span class="flex items-center justify-between w-full">
-                        <span>{{ __('Active Runs') }}</span>
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                @can('production.view')
+                    <x-sidebar-link :href="route('runs.active')" :active="request()->routeIs('runs.*')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                            </svg>
+                        </x-slot>
+                        <span class="flex items-center justify-between w-full">
+                            <span>{{ __('Active Runs') }}</span>
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
                         </span>
-                    </span>
-                </x-sidebar-link>
+                    </x-sidebar-link>
+                @endcan
 
-                <x-sidebar-link :href="route('maintenance.work-orders')" :active="request()->routeIs('maintenance.work-orders')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Work Orders') }}
-                </x-sidebar-link>
+                @can('maintenance.view')
+                    <x-sidebar-link :href="route('maintenance.work-orders')" :active="request()->routeIs('maintenance.work-orders')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </x-slot>
+                        {{ __('Work Orders') }}
+                    </x-sidebar-link>
 
-                <x-sidebar-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l-2.072-2.072a1.282 1.282 0 00-1.813 0l-4.57 4.57a1.28 1.28 0 000 1.813l1.813 1.813a1.28 1.28 0 001.813 0l4.57-4.57a1.282 1.282 0 000-1.813l-2.072-2.072zm0 0l5.47-5.47M17 12l-3-3m-1.5-1.5L17 3m-1.5 1.5L14 6" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Maint. Events') }}
-                </x-sidebar-link>
+                    <x-sidebar-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l-2.072-2.072a1.282 1.282 0 00-1.813 0l-4.57 4.57a1.28 1.28 0 000 1.813l1.813 1.813a1.28 1.28 0 001.813 0l4.57-4.57a1.282 1.282 0 000-1.813l-2.072-2.072zm0 0l5.47-5.47M17 12l-3-3m-1.5-1.5L17 3m-1.5 1.5L14 6" />
+                            </svg>
+                        </x-slot>
+                        {{ __('Maint. Events') }}
+                    </x-sidebar-link>
+                @endcan
 
+                @can('locations.move')
                 <x-sidebar-link :href="route('locations.move')" :active="request()->routeIs('locations.move')">
                     <x-slot name="icon">
                         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -98,6 +103,7 @@
                     </x-slot>
                     {{ __('Mould Movement') }}
                 </x-sidebar-link>
+                @endcan
             </div>
         @endcan
 
@@ -140,7 +146,7 @@
         </div>
 
         <!-- ANALYTICS & REPORTS -->
-        @can('operations.access')
+        @can('reports.view')
             <div class="space-y-1">
                 <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Analytics & Reports') }}</p>
                 
