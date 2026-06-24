@@ -21,7 +21,7 @@ class CompleteWorkOrder extends Component
 
     public function mount(MaintenanceEvent $event)
     {
-        abort_if(Gate::denies('maintenance_events.create'), 403);
+        abort_if(Gate::denies('maintenance_events.update'), 403);
         $this->event = $event;
         $this->checklist = $event->checklist_data ?? [];
         $this->downtimeMin = $event->downtime_min === 0 ? null : $event->downtime_min;
@@ -30,7 +30,7 @@ class CompleteWorkOrder extends Component
 
     public function save()
     {
-        abort_if(Gate::denies('maintenance_events.create'), 403);
+        abort_if(Gate::denies('maintenance_events.update'), 403);
 
         try {
             $this->validate([

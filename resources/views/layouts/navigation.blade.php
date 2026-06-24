@@ -43,70 +43,6 @@
             </x-sidebar-link>
         </div>
 
-        <!-- OPERATIONS -->
-        @can('operations.access')
-            <div class="space-y-1">
-                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Operations') }}</p>
-                
-                <x-sidebar-link :href="route('moulds.index')" :active="request()->routeIs('moulds.*')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Moulds Registry') }}
-                </x-sidebar-link>
-
-                @can('production.view')
-                    <x-sidebar-link :href="route('runs.active')" :active="request()->routeIs('runs.*')">
-                        <x-slot name="icon">
-                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                            </svg>
-                        </x-slot>
-                        <span class="flex items-center justify-between w-full">
-                            <span>{{ __('Active Runs') }}</span>
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                            </span>
-                        </span>
-                    </x-sidebar-link>
-                @endcan
-
-                @can('maintenance.view')
-                    <x-sidebar-link :href="route('maintenance.work-orders')" :active="request()->routeIs('maintenance.work-orders')">
-                        <x-slot name="icon">
-                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                        </x-slot>
-                        {{ __('Work Orders') }}
-                    </x-sidebar-link>
-
-                    <x-sidebar-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
-                        <x-slot name="icon">
-                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l-2.072-2.072a1.282 1.282 0 00-1.813 0l-4.57 4.57a1.28 1.28 0 000 1.813l1.813 1.813a1.28 1.28 0 001.813 0l4.57-4.57a1.282 1.282 0 000-1.813l-2.072-2.072zm0 0l5.47-5.47M17 12l-3-3m-1.5-1.5L17 3m-1.5 1.5L14 6" />
-                            </svg>
-                        </x-slot>
-                        {{ __('Maint. Events') }}
-                    </x-sidebar-link>
-                @endcan
-
-                @can('locations.move')
-                <x-sidebar-link :href="route('locations.move')" :active="request()->routeIs('locations.move')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Mould Movement') }}
-                </x-sidebar-link>
-                @endcan
-            </div>
-        @endcan
-
         <!-- DEPARTMENT PORTALS -->
         <div class="space-y-1">
             <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Portals') }}</p>
@@ -145,71 +81,114 @@
             @endcan
         </div>
 
-        <!-- ANALYTICS & REPORTS -->
-        @can('reports.view')
+        <!-- OPERATIONS & EXECUTION -->
+        @can('operations.access')
             <div class="space-y-1">
-                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Analytics & Reports') }}</p>
+                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-4">{{ __('Operations & Execution') }}</p>
                 
-                <x-sidebar-link :href="route('reports.production')" :active="request()->routeIs('reports.production')">
+                <x-sidebar-link :href="route('moulds.index')" :active="request()->routeIs('moulds.*')">
                     <x-slot name="icon">
                         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                         </svg>
                     </x-slot>
-                    {{ __('Production Reports') }}
+                    {{ __('Mould Directory') }}
                 </x-sidebar-link>
 
-                <x-sidebar-link :href="route('reports.maintenance')" :active="request()->routeIs('reports.maintenance')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Maintenance Reports') }}
-                </x-sidebar-link>
+                @can('production.view')
+                    <x-sidebar-link :href="route('runs.active')" :active="request()->routeIs('runs.*')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                            </svg>
+                        </x-slot>
+                        <span class="flex items-center justify-between w-full">
+                            <span>{{ __('Active Runs') }}</span>
+                            <span class="relative flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                            </span>
+                        </span>
+                    </x-sidebar-link>
+                @endcan
 
-                <x-sidebar-link :href="route('alerts.pm_due')" :active="request()->routeIs('alerts.pm_due')">
+                @can('maintenance.view')
+                    <x-sidebar-link :href="route('maintenance.work-orders')" :active="request()->routeIs('maintenance.work-orders')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </x-slot>
+                        {{ __('Active Work Orders') }}
+                    </x-sidebar-link>
+
+                    <x-sidebar-link :href="route('alerts.pm_due')" :active="request()->routeIs('alerts.pm_due')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            </svg>
+                        </x-slot>
+                        <span class="flex items-center justify-between w-full">
+                            <span>{{ __('PM Due Alerts') }}</span>
+                        </span>
+                    </x-sidebar-link>
+                @endcan
+
+                @can('locations.move')
+                <x-sidebar-link :href="route('locations.move')" :active="request()->routeIs('locations.move')">
                     <x-slot name="icon">
                         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                         </svg>
                     </x-slot>
-                    {{ __('PM Due Alerts') }}
+                    {{ __('Mould Movement') }}
                 </x-sidebar-link>
+                @endcan
             </div>
         @endcan
+
+        <!-- HISTORY & ANALYTICS -->
+        @canany(['reports.view', 'maintenance.view'])
+            <div class="space-y-1">
+                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-4">{{ __('History & Analytics') }}</p>
+                
+                @can('maintenance.view')
+                    <x-sidebar-link :href="route('maintenance.index')" :active="request()->routeIs('maintenance.index')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l-2.072-2.072a1.282 1.282 0 00-1.813 0l-4.57 4.57a1.28 1.28 0 000 1.813l1.813 1.813a1.28 1.28 0 001.813 0l4.57-4.57a1.282 1.282 0 000-1.813l-2.072-2.072zm0 0l5.47-5.47M17 12l-3-3m-1.5-1.5L17 3m-1.5 1.5L14 6" />
+                            </svg>
+                        </x-slot>
+                        {{ __('Maintenance History') }}
+                    </x-sidebar-link>
+                @endcan
+
+                @can('reports.view')
+                    <x-sidebar-link :href="route('reports.production')" :active="request()->routeIs('reports.production')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z" />
+                            </svg>
+                        </x-slot>
+                        {{ __('Production Reports') }}
+                    </x-sidebar-link>
+
+                    <x-sidebar-link :href="route('reports.maintenance')" :active="request()->routeIs('reports.maintenance')">
+                        <x-slot name="icon">
+                            <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                            </svg>
+                        </x-slot>
+                        {{ __('Maintenance Reports') }}
+                    </x-sidebar-link>
+                @endcan
+            </div>
+        @endcanany
 
         <!-- SYSTEM ADMINISTRATION -->
         @can('admin_panel.view')
             <div class="space-y-1">
-                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">{{ __('Administration') }}</p>
-                
-                <x-sidebar-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Admin Dashboard') }}
-                </x-sidebar-link>
-
-                <x-sidebar-link :href="route('import.moulds')" :active="request()->routeIs('import.moulds')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </x-slot>
-                    {{ __('Mould Importer') }}
-                </x-sidebar-link>
-
-                <x-sidebar-link :href="route('qr.moulds')" :active="request()->routeIs('qr.moulds')">
-                    <x-slot name="icon">
-                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
-                        </svg>
-                    </x-slot>
-                    {{ __('QR Utility') }}
-                </x-sidebar-link>
+                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-4">{{ __('Master Data') }}</p>
 
                 <x-sidebar-link :href="route('plants.index')" :active="request()->routeIs('plants.*')">
                     <x-slot name="icon">
@@ -245,6 +224,36 @@
                         </svg>
                     </x-slot>
                     {{ __('Parts Registry') }}
+                </x-sidebar-link>
+            </div>
+            <div class="space-y-1">
+                <p class="px-4 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-6">{{ __('System Tools') }}</p>
+
+                <x-sidebar-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
+                    <x-slot name="icon">
+                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg>
+                    </x-slot>
+                    {{ __('Admin Dashboard') }}
+                </x-sidebar-link>
+
+                <x-sidebar-link :href="route('import.moulds')" :active="request()->routeIs('import.moulds')">
+                    <x-slot name="icon">
+                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </x-slot>
+                    {{ __('Mould Importer') }}
+                </x-sidebar-link>
+
+                <x-sidebar-link :href="route('qr.moulds')" :active="request()->routeIs('qr.moulds')">
+                    <x-slot name="icon">
+                        <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
+                        </svg>
+                    </x-slot>
+                    {{ __('QR Utility') }}
                 </x-sidebar-link>
 
                 <x-sidebar-link :href="route('audit.index')" :active="request()->routeIs('audit.index')">

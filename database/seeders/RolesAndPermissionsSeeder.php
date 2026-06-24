@@ -30,6 +30,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::CloseRuns->value,
                 PermissionEnum::ManageMoulds->value,
                 PermissionEnum::CreateMaintenanceEvents->value,
+                PermissionEnum::UpdateMaintenanceEvents->value,
                 PermissionEnum::MoveLocations->value,
             ],
             RoleEnum::Maintenance->value => [
@@ -37,6 +38,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 PermissionEnum::ViewMaintenanceSection->value,
                 PermissionEnum::AccessOperations->value,
                 PermissionEnum::CreateMaintenanceEvents->value,
+                PermissionEnum::UpdateMaintenanceEvents->value,
                 PermissionEnum::DeleteMaintenanceEvents->value,
                 PermissionEnum::MoveLocations->value,
             ],

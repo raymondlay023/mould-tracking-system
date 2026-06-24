@@ -30,6 +30,7 @@ enum Permission: string
     // Maintenance
     case ViewMaintenanceSection      = 'maintenance.view';
     case CreateMaintenanceEvents     = 'maintenance_events.create';
+    case UpdateMaintenanceEvents     = 'maintenance_events.update';
     case DeleteMaintenanceEvents     = 'maintenance_events.delete';
 
     // QA
