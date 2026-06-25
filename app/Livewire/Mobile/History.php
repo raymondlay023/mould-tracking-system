@@ -12,6 +12,7 @@ class History extends Component
     {
         $runs = collect();
         $maintenance = collect();
+        $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
 
         if (auth()->user()->can('production.view') || auth()->user()->hasRole('Admin') || auth()->user()->hasRole('Supervisor')) {
             $runs = ProductionRun::with(['mould', 'machine'])
@@ -19,13 +20,13 @@ class History extends Component
                 ->latest('end_ts')
                 ->limit(20)
                 ->get()
-                ->map(function ($item) {
+                ->map(function ($item) use ($tz) {
                     return [
                         'type' => 'Production Run',
                         'title' => 'Run Completed',
                         'mould' => $item->mould->code ?? 'Unknown Mould',
                         'subtitle' => 'Machine: ' . ($item->machine->code ?? 'N/A'),
-                        'date' => $item->end_ts,
+                        'date' => $item->end_ts ? \Carbon\Carbon::parse($item->end_ts)->setTimezone($tz) : null,
                         'id' => $item->id,
                         'icon' => 'cube',
                     ];
@@ -38,13 +39,13 @@ class History extends Component
                 ->latest('end_ts')
                 ->limit(20)
                 ->get()
-                ->map(function ($item) {
+                ->map(function ($item) use ($tz) {
                     return [
                         'type' => 'Maintenance Task',
                         'title' => $item->type . ' Completed',
                         'mould' => $item->mould->code ?? 'Unknown Mould',
                         'subtitle' => \Illuminate\Support\Str::limit($item->description ?? 'No description', 40),
-                        'date' => $item->end_ts,
+                        'date' => $item->end_ts ? \Carbon\Carbon::parse($item->end_ts)->setTimezone($tz) : null,
                         'id' => $item->id,
                         'icon' => 'wrench',
                     ];
