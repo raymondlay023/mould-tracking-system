@@ -88,13 +88,15 @@
                                     <td class="p-3 text-center">
                                         <label class="relative inline-flex items-center cursor-pointer">
                                             <input type="checkbox" wire:model="checklist.{{ $index }}.cleaning" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer-checked:bg-blue-600 transition-colors"></div>
+                                            <span class="absolute top-[2px] left-[2px] bg-white border border-slate-300 rounded-full h-5 w-5 transition-all peer-checked:translate-x-5"></span>
                                         </label>
                                     </td>
                                     <td class="p-3 text-center">
                                         <label class="relative inline-flex items-center cursor-pointer">
                                             <input type="checkbox" wire:model="checklist.{{ $index }}.lubricate" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer-checked:bg-blue-600 transition-colors"></div>
+                                            <span class="absolute top-[2px] left-[2px] bg-white border border-slate-300 rounded-full h-5 w-5 transition-all peer-checked:translate-x-5"></span>
                                         </label>
                                     </td>
                                     <td class="p-3">
@@ -209,9 +211,10 @@
                                 <span class="text-sm font-medium text-slate-700 leading-snug {{ !empty($item['completed']) ? 'line-through text-slate-400' : '' }} mr-4">
                                     {{ $item['task'] }}
                                 </span>
-                                <div class="relative inline-flex items-center shrink-0">
+                                <div class="relative inline-flex items-center shrink-0 cursor-pointer">
                                     <input type="checkbox" wire:model="checklist.{{ $index }}.completed" class="sr-only peer">
-                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer-checked:bg-blue-600 transition-colors"></div>
+                                    <span class="absolute top-[2px] left-[2px] bg-white border border-slate-300 rounded-full h-5 w-5 transition-all peer-checked:translate-x-5"></span>
                                 </div>
                             </label>
                         @endforeach
