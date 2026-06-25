@@ -75,4 +75,38 @@ class NotificationTest extends TestCase
             ->assertSee('New Work Order')
             ->assertSee('M001');
     }
+
+    public function test_notification_bell_redirects_to_mobile_url_when_clicked_from_mobile_context()
+    {
+        $user = User::factory()->create();
+        $mould = Mould::factory()->create(['code' => 'M001']);
+        
+        $event = \App\Models\MaintenanceEvent::factory()->create(['mould_id' => $mould->id]);
+        $noti = new \App\Notifications\Maintenance\WorkOrderRequested($event);
+        $user->notify($noti);
+
+        $notificationId = $user->unreadNotifications()->first()->id;
+
+        Livewire::actingAs($user)
+            ->test(NotificationBell::class, ['isMobile' => true])
+            ->call('markAsRead', $notificationId)
+            ->assertRedirect(route('mobile.maintenance-tasks'));
+    }
+
+    public function test_notification_bell_redirects_to_desktop_url_when_clicked_from_desktop_context()
+    {
+        $user = User::factory()->create();
+        $mould = Mould::factory()->create(['code' => 'M001']);
+        
+        $event = \App\Models\MaintenanceEvent::factory()->create(['mould_id' => $mould->id]);
+        $noti = new \App\Notifications\Maintenance\WorkOrderRequested($event);
+        $user->notify($noti);
+
+        $notificationId = $user->unreadNotifications()->first()->id;
+
+        Livewire::actingAs($user)
+            ->test(NotificationBell::class, ['isMobile' => false])
+            ->call('markAsRead', $notificationId)
+            ->assertRedirect(route('maintenance.work-orders'));
+    }
 }

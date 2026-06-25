@@ -44,7 +44,7 @@
 
                     <!-- Top Bar Actions (Notifications & User Menu) -->
                     <div class="flex items-center gap-3">
-                        <livewire:partials.notification-bell />
+                        <livewire:partials.notification-bell :is-mobile="false" />
 
                         <!-- Settings Dropdown -->
                         <x-dropdown align="right" width="48">

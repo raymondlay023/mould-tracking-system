@@ -26,7 +26,7 @@
                 <span class="font-bold text-lg tracking-tight">MouldTrack</span>
             </div>
             <div class="flex items-center gap-3">
-                <livewire:partials.notification-bell />
+                <livewire:partials.notification-bell :is-mobile="true" />
 
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
