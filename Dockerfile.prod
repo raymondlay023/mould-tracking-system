@@ -75,11 +75,14 @@ COPY --from=vendor /app/vendor/ vendor/
 # Copy built frontend assets
 COPY --from=frontend /app/public/build/ public/build/
 
+# Create a fresh copy of public directory to bypass Docker volume caching on startup
+RUN cp -R public public_fresh
+
 # Setup directories and permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache \
-    && chmod -R 755 public
+    && chmod -R 755 public public_fresh
 
 # Set Entrypoint (copied before .dockerignore strips docker/ on COPY . .)
 COPY docker/production/entrypoint.sh /usr/local/bin/entrypoint.sh

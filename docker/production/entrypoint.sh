@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+echo "Syncing public assets to volume..."
+rm -rf /var/www/html/public/build
+cp -rp /var/www/html/public_fresh/. /var/www/html/public/
+
 echo "Running Laravel setup tasks..."
 php artisan config:cache
 php artisan route:cache
