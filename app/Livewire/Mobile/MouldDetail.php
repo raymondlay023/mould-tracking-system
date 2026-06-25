@@ -60,7 +60,7 @@ class MouldDetail extends Component
             'maintenanceDescription' => 'required_if:maintenanceType,CM|nullable|string|max:500'
         ]);
 
-        \App\Models\MaintenanceEvent::create([
+        $event = \App\Models\MaintenanceEvent::create([
             'mould_id' => $this->mould->id,
             'type' => $this->maintenanceType,
             'pm_subtype' => $this->maintenanceType === 'PM' ? $this->maintenancePmSubtype : null,
@@ -71,9 +71,9 @@ class MouldDetail extends Component
 
         $this->showMaintenanceModal = false;
 
-        $recipients = \App\Models\User::permission('view_maintenance_section')->get();
+        $recipients = \App\Models\User::permission('maintenance.view')->get();
         if ($recipients->count() > 0) {
-            \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\Maintenance\WorkOrderRequested(\App\Models\MaintenanceEvent::latest('id')->first()));
+            \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\Maintenance\WorkOrderRequested($event));
         }
 
         session()->flash('success', 'Maintenance log submitted successfully.');

@@ -66,7 +66,7 @@ class WorkOrders extends Component
         $tz = auth()->user()?->timezone ?? 'Asia/Jakarta';
         $utcStart = \Carbon\Carbon::createFromFormat('Y-m-d\TH:i', $this->newStartTs, $tz)->setTimezone('UTC');
 
-        MaintenanceEvent::create([
+        $event = MaintenanceEvent::create([
             'mould_id' => $this->newMouldId,
             'type' => $this->newType,
             'pm_subtype' => $this->newType === 'PM' ? $this->newPmSubtype : null,
@@ -81,8 +81,7 @@ class WorkOrders extends Component
         // Notify
         $recipients = \App\Models\User::permission('maintenance.view')->get();
         if ($recipients->count() > 0) {
-            \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\Maintenance\WorkOrderRequested($event = MaintenanceEvent::latest('id')->first()));
-            // Note: retrieving latest() is a bit racy but simplest for now without changing create return
+            \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\Maintenance\WorkOrderRequested($event));
         }
 
         session()->flash('success', 'New Work Order requested.');
