@@ -25,6 +25,21 @@ services:
             - mysql
             - mailpit
             - redis
+    queue-worker:
+        image: sail-8.4/app
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            mysql:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        command: php artisan queue:work --verbose --tries=3 --timeout=90
     mysql:
         image: 'mysql:8.4'
         ports:
